@@ -57,7 +57,7 @@ Leaf area in 1990
 
 Load data, make variable of interest numeric, filter out systems with zero leaf area:
 ```{r load 1990, warning=FALSE, message=FALSE}
-may<-read.csv("Datasets/mayapple_1990_updated.csv")
+may<-readxl::read_excel("mayapple_1990.xlsx", na=".")
 
 may$Lf_90<-as.numeric(as.character(may$Lf_90))
 
@@ -121,7 +121,7 @@ Read in data, select variables from the front of the system. Also filtering out 
 
 ```{r}
 # set na.strings="." to recode '.' to NA
-mayappleDatasetFull<-readxl::read_excel("Datasets/mayapple_1990_updated.xlsx", na=".")
+mayappleDatasetFull<-readxl::read_excel("mayapple_1990.xlsx", na=".")
 
 mayappleData <- mayappleDatasetFull %>% 
   dplyr::select(COLONY,Lf_90,brnoF_91,Sex_90,Sever,Time,SexF1_91,SexF2_91,SexF3_91,LfFtot_91) %>% 
@@ -176,7 +176,7 @@ Read in data, select relevant variables. Convert response to numeric, remove NA 
 
 ```{r}
 
-mayappleDatasetFull<-readxl::read_excel("Datasets/mayapple_1990_updated.xlsx", na=".")
+mayappleDatasetFull<-readxl::read_excel("mayapple_1990.xlsx", na=".")
 
 mayappleData <- mayappleDatasetFull %>% 
   dplyr::select(COLONY,Lf_90,brnoF_91,Sex_90,Sever,Time,SexF1_91,SexF2_91,SexF3_91,LfFtot_91) %>% 
@@ -230,7 +230,7 @@ Read in data, select relevant variables, filter out records with zero leaf area 
 
 ```{r}
 # set na.strings="." to recode '.' to NA
-mayappleDatasetFull<-readxl::read_excel("Datasets/mayapple_1990_updated.xlsx", na=".")
+mayappleDatasetFull<-readxl::read_excel("mayapple_1990.xlsx", na=".")
 
 mayappleData <- mayappleDatasetFull %>% 
   dplyr::select(COLONY,Lf_90,Sex_90,Sever,Time,brnoB_91,LfB1_91,SexB1_91,LfB2_91,SexB2_91,LfBtot_91,Lftot_91) %>% 
@@ -285,7 +285,7 @@ The total leaf area of the back system in 1991 (for systems with shoots in 1991)
 
 Read in data, select relevant variables. Convert response to numeric, remove NA values and select systems with non-zero back leaf area in 1991.
 ```{r}
-mayappleDatasetFull<-readxl::read_excel("Datasets/mayapple_1990_updated.xlsx", na=".")
+mayappleDatasetFull<-readxl::read_excel("mayapple_1990.xlsx", na=".")
 
 mayappleData <- mayappleDatasetFull %>% 
   dplyr::select(COLONY,Lf_90,Sex_90,Sever,Time,brnoB_91,LfB1_91,SexB1_91,LfB2_91,SexB2_91,LfBtot_91,Lftot_91) %>% 
@@ -344,7 +344,7 @@ Read in data, select relevant variables. Filter out the records without leaf are
 
 ```{r}
 # set na.strings="." to recode '.' to NA
-mayappleDatasetFull<-readxl::read_excel("Datasets/mayapple_1990_updated_version2.xlsx", na=".")
+mayappleDatasetFull<-readxl::read_excel("mayapple_1990.xlsx", na=".")
 
 mayappleData <- mayappleDatasetFull %>% 
   dplyr::select(COLONY,Lf_90,Sex_90,Sever,Time,LftotF_92, Lftot_91, LfBtot_91, LfFtot_91) %>% 
@@ -394,7 +394,7 @@ Read in data, select relevant variables. Filter out the records without leaf are
 
 ```{r}
 # set na.strings="." to recode '.' to NA
-mayappleDatasetFull<-readxl::read_excel("Datasets/mayapple_1990_updated_version2.xlsx", na=".")
+mayappleDatasetFull<-readxl::read_excel("mayapple_1990.xlsx", na=".")
 
 mayappleData <- mayappleDatasetFull %>% 
   dplyr::select(COLONY,Lf_90,Sex_90,Sever,Time,LftotB_92, Lftot_91, LfBtot_91, LfFtot_91) %>% 

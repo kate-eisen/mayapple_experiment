@@ -24,7 +24,7 @@ library(mdthemes)
 
 Working with leaf area in 1990:
 ```{r, warning=FALSE, message=FALSE}
-may<-read.csv("Datasets/mayapple_1990_updated.csv")
+may<-readxl::read_excel("mayapple_1990.xlsx", na=".")
 ##need to make the variables we are working with numeric:
 may$Lf_90<-as.numeric(as.character(may$Lf_90))
 
@@ -51,7 +51,7 @@ Working with front shoot production in 1991:
 
 ```{r}
 # set na.strings="." to recode '.' to NA
-mayappleDatasetFull<-readxl::read_excel("Datasets/mayapple_1990_updated.xlsx", na=".")
+mayappleDatasetFull<-readxl::read_excel("mayapple_1990.xlsx", na=".")
 
 # select variables for analysis and filter out rows that don't have a leaf area recorded in 1990
 mayappleData <- mayappleDatasetFull %>% 
@@ -105,7 +105,7 @@ Working with back shoot production in 1991:
 
 ```{r}
 # set na.strings="." to recode '.' to NA
-mayappleDatasetFull<-readxl::read_excel("Datasets/mayapple_1990_updated.xlsx", na=".")
+mayappleDatasetFull<-readxl::read_excel("mayapple_1990.xlsx", na=".")
 
 mayappleData <- mayappleDatasetFull %>% 
   dplyr::select(COLONY,Lf_90,Sex_90,Sever,Time,brnoB_91,LfB1_91,SexB1_91,LfB2_91,SexB2_91,LfBtot_91,Lftot_91) %>% 
@@ -170,6 +170,8 @@ ggdraw() +
 ## Figure 2
 
 ```{r}
+mayappleDatasetFull<-readxl::read_excel("mayapple_1990.xlsx", na=".")
+
 
 mayappleData91 <- mayappleDatasetFull %>% 
   dplyr::select(COLONY,Lf_90,Sex_90,Sever,Time, 

@@ -33,7 +33,7 @@ Read in data, select relevant variables and convert to numeric, filter out syste
 
 ```{r}
 
-mayappleDatasetFull<-readxl::read_excel("~/Box/Mayapple/Datasets/mayapple_1990_updated_version2.xlsx", na=".")
+mayappleDatasetFull<-readxl::read_excel("mayapple_1990.xlsx", na=".")
 
 mayappleData91 <- mayappleDatasetFull %>% 
   dplyr::select(COLONY,Lf_90,Sex_90,Sever,Time, 
