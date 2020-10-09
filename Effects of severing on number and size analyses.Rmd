@@ -1,0 +1,149 @@
+---
+title: "Effects of severing on rhizome number and size analyses"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+This document contains the code used to run the analyses for Q4 in the manuscript, including code used to generate the values in Tables S8-S13.
+
+Packages:
+
+```{r pkgs, warning=FALSE, message=FALSE, include=FALSE}
+library(tidyverse)
+library(glmmTMB)
+library(lmerTest)
+library(emmeans)
+library(ggplot2)
+library(ggeffects)
+library(readxl)
+library(MuMIn)
+library(kableExtra)
+library(gt)
+library(webshot)
+```
+
+## Analyses for 1991
+
+Read in data, select relevant variables and convert to numeric, filter out systems without leaf area measurements in 1990 and 1991.
+
+```{r}
+
+mayappleDatasetFull<-readxl::read_excel("~/Box/Mayapple/Datasets/mayapple_1990_updated_version2.xlsx", na=".")
+
+mayappleData91 <- mayappleDatasetFull %>% 
+  dplyr::select(COLONY,Lf_90,Sex_90,Sever,Time, 
+                LfFtot_91, LfBtot_91, Lftot_91,
+                LftotF_92, LftotB_92, Lftot_92,
+                brnoF_91, brnoB_91,
+                brnoF_92, brnoB_92) %>% 
+  mutate(Lftot_92=parse_double(Lftot_92), Lftot_91=parse_double(Lftot_91)) %>% 
+  mutate(LftotB_92=parse_double(LftotB_92), LfBtot_91=parse_double(LfBtot_91) ) %>% 
+  mutate(LftotF_92=parse_double(LftotF_92), LfFtot_91=parse_double(LfFtot_91) ) %>% 
+  mutate(brnoF_92=parse_double(brnoF_92), brnoB_92=parse_double(brnoB_92) ) %>% 
+  filter(!is.na(Lf_90)) %>% 
+  filter(!is.na(Lftot_91))
+```
+
+
+### Contingency table 1991
+
+Creating a variable that describes whether plants had zero systems, one descendant system or a front and back system in 1991. Use this to do a chi-square test.
+
+```{r, warning=FALSE,message=FALSE}
+
+mayappleData91 <- mayappleData91 %>% mutate(Status = case_when(LfFtot_91!=0 & LfBtot_91!=0 ~"Two",
+                                             LfFtot_91==0 & LfBtot_91!=0 ~"One",
+                                             LfFtot_91!=0 & LfBtot_91==0 ~"One",
+                                             LfFtot_91==0 & LfBtot_91==0 ~"None")) %>% 
+  mutate(Status = factor(Status, levels=c("None", "One", "Two")))
+
+chisq.test(mayappleData91$Status, mayappleData91$Sever)
+chi<-chisq.test(mayappleData91$Status, mayappleData91$Sever)
+chi$observed
+chi$expected
+chi$residuals
+```
+
+### Leaf area 1991
+
+Working with the status variable created for the chi-squared analysis, and filtering out the `None` records, because they have zero leaf area by definition. Create a variable for the average leaf area of a system, which is the leaf area of the system for one descendant systems, and the leaf area divided by two for front and back systems.
+
+```{r}
+mayappleData91 <- mayappleData91 %>% filter(Status != "None") %>% 
+  mutate(Lf91s=ifelse(Status=="Two", Lftot_91/2, Lftot_91)) 
+```
+
+Run linear mixed effects model, check residuals.
+Run anova and estimate marginal means comparisons.
+```{r}
+s91mod2<-lmer(Lf91s~Status*Sever+(1|COLONY), data = mayappleData91)
+par(mfrow=c(1,2))
+hist(resid(s91mod2))
+plot(predict(s91mod2),resid(s91mod2)) ; abline(h=0)
+
+anova(s91mod2)
+emmeans(s91mod2, pairwise~Status)
+emmeans(s91mod2, pairwise~Sever|Status)
+emmeans(s91mod2, pairwise~Status|Sever)
+```
+
+
+## Analyses for 1992
+
+Taking the 1991 dataset and further filtering out records without a leaf area measurement in 1992.
+
+```{r}
+mayappleData92 <- mayappleData91 %>% 
+  filter(!is.na(Lftot_92))
+```
+
+### Contingency table 1992
+
+Creating a variable that describes whether plants had zero systems, one descendant system or a front and back system in 1992. Use this to do a chi-square test.
+
+
+```{r, warning=FALSE,message=FALSE}
+
+mayappleData92 <- mayappleData92 %>% mutate(Status = case_when(LftotF_92!=0 & LftotB_92!=0 ~"Two",
+                                             LftotF_92==0 & LftotB_92!=0 ~"One",
+                                             LftotF_92!=0 & LftotB_92==0 ~"One",
+                                             LftotF_92==0 & LftotB_92==0 ~"None")) %>% 
+  mutate(Status = factor(Status, levels=c("None", "One", "Two")))
+
+chisq.test(mayappleData92$Status, mayappleData92$Sever)
+chi<-chisq.test(mayappleData92$Status, mayappleData92$Sever)
+chi$observed
+chi$expected
+chi$residuals
+```
+
+
+### Leaf area 1992
+
+Working with the status variable created for the chi-squared analysis, and filtering out the `None` records, because they have zero leaf area by definition. Create a variable for the average leaf area of a system, which is the leaf area of the system for one descendant systems, and the leaf area divided by two for front and back systems.
+
+```{r}
+mayappleData92 <- mayappleData92 %>% filter(Status != "None") %>% 
+  mutate(Lf92s=ifelse(Status=="Two", Lftot_92/2, Lftot_92)) 
+```
+
+Run linear mixed effects model, check residuals.
+Run anova and estimate marginal means comparisons.
+
+```{r}
+s92mod2<-lmer(Lf92s~Status*Sever+(1|COLONY), data = mayappleData92)
+par(mfrow=c(1,2))
+hist(resid(s91mod2))
+plot(predict(s91mod2),resid(s91mod2)) ; abline(h=0)
+
+anova(s92mod2)
+emmeans(s92mod2, pairwise~Status)
+emmeans(s92mod2, pairwise~Sever|Status)
+emmeans(s92mod2, pairwise~Status|Sever)
+```
+

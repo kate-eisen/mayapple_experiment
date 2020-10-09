@@ -1,0 +1,241 @@
+---
+title: "Plots"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction 
+
+This document contains the code needed to recreate the plots in the manuscript (Figure 1, Figure 2, Figure S1). *Note*: All figure aesthetics were finalized in Adobe Illustrator.
+
+```{r}
+library(cowplot)
+library(mdthemes)
+```
+
+## Figure 1
+
+*Note*: the models used to generate the estimated marginal means were the best models returned by our model selection procedure. See `Model selection analyses.Rmd`.
+
+### Panels A to C
+
+Working with leaf area in 1990:
+```{r, warning=FALSE, message=FALSE}
+may<-read.csv("Datasets/mayapple_1990_updated.csv")
+##need to make the variables we are working with numeric:
+may$Lf_90<-as.numeric(as.character(may$Lf_90))
+
+may<-may %>% 
+  filter(!is.na(Lf_90))
+
+model.bm<-lmer(Lf_90~Sex_90*Time+Sever*Time+(1|COLONY), data=may, na.action = "na.fail", REML=FALSE)
+```
+
+Drawing panels:
+
+```{r, warning=FALSE, message=FALSE}
+
+Sever_1 <- emmip(model.bm,  ~ Sever ,CIs = TRUE)+xlab("")+mdthemes::md_theme_classic() +ggtitle("**Sever**  
+                                                                                                         *Leaf area in 1990*")
+Time_1 <- emmip(model.bm,  ~ Time ,CIs = TRUE)+xlab("")+ylab("")+mdthemes::md_theme_classic() +ggtitle("**Time**") 
+
+Int_1 <- emmip(model.bm, Time  ~ Sever  ,CIs = TRUE)+xlab("")+ylab("")+mdthemes::md_theme_classic()+ggtitle("**Sever x Time**")
+```
+
+### Panels D and E
+
+Working with front shoot production in 1991:
+
+```{r}
+# set na.strings="." to recode '.' to NA
+mayappleDatasetFull<-readxl::read_excel("Datasets/mayapple_1990_updated.xlsx", na=".")
+
+# select variables for analysis and filter out rows that don't have a leaf area recorded in 1990
+mayappleData <- mayappleDatasetFull %>% 
+  dplyr::select(COLONY,Lf_90,brnoF_91,Sex_90,Sever,Time,SexF1_91,SexF2_91,SexF3_91,LfFtot_91) %>% 
+  filter(!is.na(Lf_90))
+
+# create binary variable for plants that are dead/have no branches (0) or have 1 or more branches (1)
+# append new variable to the dataframe
+mayappleData<- mayappleData %>% 
+  dplyr::mutate(deadAliveBinary=ifelse(brnoF_91>0,1,0))
+
+sur_91f_bm<-glmmTMB(deadAliveBinary~ Sever+Time +  (1|COLONY), data = mayappleData,
+                family="binomial")
+
+
+```
+
+Drawing panels:
+
+```{r}
+Sever_2 <- emmip(sur_91f_bm,   ~ Sever  , type="response",CIs = TRUE)+xlab("")+ylab("Predicted probability")+mdthemes::md_theme_classic()+ggtitle("*Front survival in 1991*")
+
+Time_2 <- emmip(sur_91f_bm,   ~ Time  ,type="response",CIs = TRUE)+xlab("")+ylab("")+mdthemes::md_theme_classic()
+```
+
+### Panel F
+
+Working with front leaf area in 1991, using systems with a non-zero leaf area in 1991.
+
+```{r, warning=FALSE, message=FALSE}
+mayappleData$LfFtot_91<-as.numeric(mayappleData$LfFtot_91)
+
+mayappleData <- mayappleData %>% 
+  filter(!is.na(LfFtot_91)) %>% 
+  filter(LfFtot_91>0)
+
+mod91laf.bm<-lmer(LfFtot_91~Sever+Lf_90 +(1|COLONY), data = mayappleData, na.action ="na.fail", REML=FALSE)
+
+```
+
+Drawing panel:
+
+```{r}
+Sever_3 <- emmip(mod91laf.bm,   ~ Sever  ,CIs = TRUE)+xlab("")+mdthemes::md_theme_classic()+ggtitle("*Front leaf area in 1991*")
+
+```
+
+### Panels G and H
+
+Working with back shoot production in 1991:
+
+```{r}
+# set na.strings="." to recode '.' to NA
+mayappleDatasetFull<-readxl::read_excel("Datasets/mayapple_1990_updated.xlsx", na=".")
+
+mayappleData <- mayappleDatasetFull %>% 
+  dplyr::select(COLONY,Lf_90,Sex_90,Sever,Time,brnoB_91,LfB1_91,SexB1_91,LfB2_91,SexB2_91,LfBtot_91,Lftot_91) %>% 
+  filter(!is.na(Lf_90))
+
+mayappleData<- mayappleData %>% 
+  dplyr::mutate(backShootBranchBinary=ifelse(brnoB_91>0,1,0)) %>% 
+  filter(!is.na(backShootBranchBinary))
+
+sur_91b_bm<-glmmTMB(backShootBranchBinary~ Sever+Time + Lf_90 +(1|COLONY), data = mayappleData,
+                family="binomial")
+```
+
+Drawing panels:
+
+```{r}
+Sever_4 <- emmip(sur_91b_bm,   ~ Sever  ,type="response",CIs = TRUE )+xlab("")+ylab("Predicted probability")+mdthemes::md_theme_classic()+ggtitle("*Back shoot production in 1991*")
+
+Time_4 <- emmip(sur_91b_bm,   ~ Time  ,type="response",CIs = TRUE )+xlab("")+ylab("")+mdthemes::md_theme_classic()
+```
+
+### Panels I and J:
+
+Working with leaf area of the back of the system in 1991, for those systems with non-zero leaf area in the back in 1991.
+
+```{r}
+mayappleData$LfBtot_91<-as.numeric(mayappleData$LfBtot_91)
+
+mayappleData <- mayappleData %>% 
+  filter(!is.na(LfBtot_91)) %>% 
+  filter(LfBtot_91>0)
+
+b_mod91la.bm<-lmer(LfBtot_91~Sex_90+Sever+Time +Lf_90+(1|COLONY), data = mayappleData, na.action ="na.fail", REML=FALSE)
+
+```
+
+Drawing panels:
+
+```{r}
+Sever_5 <- emmip(b_mod91la.bm,  ~ Sever  ,CIs = TRUE )+mdthemes::md_theme_classic()+ggtitle("*Back leaf area in 1991*")
+Time_5 <- emmip(b_mod91la.bm,  ~ Time  ,CIs = TRUE )+ylab("")+mdthemes::md_theme_classic()
+```
+
+
+### Making the composite figure:
+
+```{r}
+ggdraw() +
+  draw_plot(Sever_1, x=0, y=0.8, width=0.33, height=0.2)+
+  draw_plot(Sever_2, x=0, y=0.6,width=0.33, height=0.2)+
+  draw_plot(Sever_3, x=0, y=0.4,width=0.33, height=0.2)+
+  draw_plot(Sever_4, x=0, y=0.2,width=0.33, height=0.2)+
+  draw_plot(Sever_5, x=0, y=0.0,width=0.33, height=0.2)+
+  draw_plot(Time_1, x=0.33, y=0.8, width=0.33, height=0.2)+
+  draw_plot(Time_2, x=0.33, y=0.6,width=0.33, height=0.2)+
+  draw_plot(Time_4, x=0.33, y=0.2,width=0.33, height=0.2)+
+  draw_plot(Time_5, x=0.33, y=0.0,width=0.33, height=0.2)+
+  draw_plot(Int_1, x=0.67, y=0.8, width=0.33, height=0.2)
+```
+
+
+## Figure 2
+
+```{r}
+
+mayappleData91 <- mayappleDatasetFull %>% 
+  dplyr::select(COLONY,Lf_90,Sex_90,Sever,Time, 
+                LfFtot_91, LfBtot_91, Lftot_91,
+                LftotF_92, LftotB_92, Lftot_92,
+                brnoF_91, brnoB_91,
+                brnoF_92, brnoB_92) %>% 
+  mutate(Lftot_92=parse_double(Lftot_92), Lftot_91=parse_double(Lftot_91)) %>% 
+  mutate(LftotB_92=parse_double(LftotB_92), LfBtot_91=parse_double(LfBtot_91) ) %>% 
+  mutate(LftotF_92=parse_double(LftotF_92), LfFtot_91=parse_double(LfFtot_91) ) %>% 
+  mutate(brnoF_92=parse_double(brnoF_92), brnoB_92=parse_double(brnoB_92) ) %>% 
+  filter(!is.na(Lf_90)) %>% 
+  filter(!is.na(Lftot_91)) %>% 
+mutate(Status = case_when(LfFtot_91!=0 & LfBtot_91!=0 ~"Two",
+                                             LfFtot_91==0 & LfBtot_91!=0 ~"One",
+                                             LfFtot_91!=0 & LfBtot_91==0 ~"One",
+                                             LfFtot_91==0 & LfBtot_91==0 ~"None")) %>% 
+  mutate(Status = factor(Status, levels=c("None", "One", "Two"))) %>% 
+ filter(Status != "None") %>% 
+  mutate(Lf91s=ifelse(Status=="Two", Lftot_91/2, Lftot_91)) 
+
+s91mod1<-lmer(Lftot_91~Status*Sever+(1|COLONY), data = mayappleData91)
+a<-emmip(s91mod1, Sever~Status  ,CIs = TRUE)+ ylab("Total leaf area")+ 
+  theme_bw()+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+xlab("")+theme(legend.position = "none")+theme(panel.border = element_blank(), axis.line = element_line())
+
+counts<-mayappleData91 %>% group_by(Status, Sever) %>% 
+  count(N=length(Sever))
+
+s91mod2<-lmer(Lf91s~Status*Sever+(1|COLONY), data = mayappleData91)
+b<-emmip(s91mod2, Sever~Status  ,CIs = TRUE)+ ylab("Average leaf area per system")+ 
+  theme_bw()+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+scale_y_continuous(limits=c(-250, 1500))+ geom_text(data=counts, aes(x=Status, y=N, label=N, color=Sever))
+
+
+
+ggdraw(b) +
+  draw_plot(a, .35, .47, .6, .6, scale=0.75)
+```
+
+## Figure S1
+
+```{r}
+mayappleData92 <- mayappleData91 %>% 
+  filter(!is.na(Lftot_92)) %>% 
+  mutate(Status = case_when(LftotF_92!=0 & LftotB_92!=0 ~"Two",
+                                             LftotF_92==0 & LftotB_92!=0 ~"One",
+                                             LftotF_92!=0 & LftotB_92==0 ~"One",
+                                             LftotF_92==0 & LftotB_92==0 ~"None")) %>% 
+  mutate(Status = factor(Status, levels=c("None", "One", "Two"))) %>% 
+  mayappleData92 <- mayappleData92 %>% filter(Status != "None") %>% 
+  mutate(Lf92s=ifelse(Status=="Two", Lftot_92/2, Lftot_92)) 
+
+
+s92mod1<-lmer(Lftot_92~Status*Sever+(1|COLONY), data = mayappleData92)
+a<-emmip(s92mod1, Sever~Status  ,CIs = TRUE)+ ylab("Total leaf area")+ 
+  theme_bw()+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+xlab("")+theme(legend.position = "none")+theme(panel.border = element_blank(), axis.line = element_line())
+
+counts<-mayappleData92 %>% group_by(Status, Sever) %>% 
+  count(N=length(Sever))
+
+s92mod2<-lmer(Lf92s~Status*Sever+(1|COLONY), data = mayappleData92)
+b<-emmip(s92mod2, Sever~Status  ,CIs = TRUE)+ ylab("Average leaf area per system")+ 
+  theme_bw()+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+scale_y_continuous(limits=c(-250, 1500))+ geom_text(data=counts, aes(x=Status, y=N, label=N, color=Sever))
+
+ggdraw(b) +
+  draw_plot(a, .35, .47, .6, .6, scale=0.75)
+
+```
+
+
