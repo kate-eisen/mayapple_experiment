@@ -12,8 +12,11 @@ knitr::opts_chunk$set(echo = TRUE)
 This document contains the code needed to recreate the plots in the manuscript (Figure 1, Figure 2, Figure S1). *Note*: All figure aesthetics were finalized in Adobe Illustrator.
 
 ```{r}
+library(tidyverse)
+library(readxl)
 library(cowplot)
 library(mdthemes)
+library(ggpubr)
 ```
 
 ## Figure 1
@@ -211,6 +214,114 @@ ggdraw(b) +
 ```
 
 ## Figure S1
+
+```{r}
+
+
+
+
+#This is 1991 front leaf area. We need to do this for all of the response variables discussed for Q3
+mayappleDatasetFull<-readxl::read_excel("mayapple_1990.xlsx", na=".")
+
+mayappleData <- mayappleDatasetFull %>% 
+  dplyr::select(COLONY,Lf_90,brnoF_91,Sex_90,Sever,Time,SexF1_91,SexF2_91,SexF3_91,LfFtot_91) %>% 
+  filter(!is.na(Lf_90))
+
+mayappleData$LfFtot_91<-as.numeric(mayappleData$LfFtot_91)
+
+mayappleData <- mayappleData %>% 
+  filter(!is.na(LfFtot_91))
+
+a <- ggplot(data=mayappleData, aes(x=Lf_90, y=LfFtot_91, color=Sex_90)) +
+  geom_point() + geom_smooth(method = "lm", se = FALSE)+theme_classic()+
+  ylab("Front leaf area in 1991") +xlab("Leaf area in 1990")+ scale_color_discrete(name="Sexual status in 1990")
+
+#1991 back shoot production
+
+mayappleDatasetFull<-readxl::read_excel("mayapple_1990.xlsx", na=".")
+
+mayappleData <- mayappleDatasetFull %>% 
+  dplyr::select(COLONY,Lf_90,Sex_90,Sever,Time,brnoB_91,LfB1_91,SexB1_91,LfB2_91,SexB2_91,LfBtot_91,Lftot_91) %>% 
+  filter(!is.na(Lf_90))
+
+mayappleData<- mayappleData %>% 
+  dplyr::mutate(backShootBranchBinary=ifelse(brnoB_91>0,1,0)) %>% 
+  filter(!is.na(backShootBranchBinary))
+
+b <- ggplot(data=mayappleData, aes(x=Lf_90, y=backShootBranchBinary, color=Sex_90)) +
+  geom_point() + geom_smooth(method = "lm", se = FALSE)+theme_classic()+
+  ylab("Probability of producing \n back shoot in 1991")  +xlab("Leaf area in 1990")+ scale_color_discrete(name="Sexual status in 1990")
+
+
+#1991 back leaf area
+
+mayappleData$LfBtot_91<-as.numeric(mayappleData$LfBtot_91)
+
+mayappleData <- mayappleData %>% 
+  filter(!is.na(LfBtot_91)) %>% 
+  filter(LfBtot_91>0)
+
+c <- ggplot(data=mayappleData, aes(x=Lf_90, y=LfBtot_91, color=Sex_90)) +
+  geom_point() + geom_smooth(method = "lm", se = FALSE)+theme_classic()+
+  ylab("Back leaf area in 1991")  +xlab("Leaf area in 1990")+ scale_color_discrete(name="Sexual status in 1990")
+
+
+#1992 front leaf area
+
+#need leaf 90 and front leaf 91
+
+mayappleDatasetFull<-readxl::read_excel("mayapple_1990.xlsx", na=".")
+
+mayappleData <- mayappleDatasetFull %>% 
+  dplyr::select(COLONY,Lf_90,Sex_90,Sever,Time,LftotF_92, Lftot_91, LfBtot_91, LfFtot_91) %>% 
+  mutate(LftotF_92=parse_double(LftotF_92), Lftot_91=parse_double(Lftot_91), LfBtot_91=parse_double(LfBtot_91), LfFtot_91=parse_double(LfFtot_91) ) %>% 
+  filter(!is.na(Lf_90)) %>% 
+  filter(!is.na(Lftot_91)) %>% 
+  filter(!is.na(LftotF_92))
+
+d <- ggplot(data=mayappleData, aes(x=Lf_90, y=LftotF_92, color=Sex_90)) +
+  geom_point() + geom_smooth(method = "lm", se = FALSE)+theme_classic()+
+  ylab("Front leaf area in 1992") +xlab("Leaf area in 1990")+ scale_color_discrete(name="Sexual status in 1990")
+
+e <- ggplot(data=mayappleData, aes(x=LfFtot_91, y=LftotF_92, color=Sex_90)) +
+  geom_point() + geom_smooth(method = "lm", se = FALSE)+theme_classic()+
+  ylab("Front leaf area in 1992") +xlab("Front leaf area in 1991")+ scale_color_discrete(name="Sexual status in 1990")
+
+
+#1992 back leaf area
+
+mayappleDatasetFull<-readxl::read_excel("mayapple_1990.xlsx", na=".")
+
+mayappleData <- mayappleDatasetFull %>% 
+  dplyr::select(COLONY,Lf_90,Sex_90,Sever,Time,LftotB_92, Lftot_91, LfBtot_91, LfFtot_91) %>% 
+  mutate(LftotB_92=parse_double(LftotB_92), Lftot_91=parse_double(Lftot_91), LfBtot_91=parse_double(LfBtot_91), LfFtot_91=parse_double(LfFtot_91) ) %>% 
+  filter(!is.na(Lf_90)) %>% 
+  filter(!is.na(Lftot_91)) %>% 
+  filter(!is.na(LftotB_92))
+
+f <- ggplot(data=mayappleData, aes(x=Lf_90, y=LftotB_92, color=Sex_90)) +
+  geom_point() + geom_smooth(method = "lm", se = FALSE)+theme_classic()+
+  ylab("Back leaf area in 1992") +xlab("Leaf area in 1990")+ scale_color_discrete(name="Sexual status in 1990")
+
+g <- ggplot(data=mayappleData, aes(x=LfBtot_91, y=LftotB_92, color=Sex_90)) +
+  geom_point() + geom_smooth(method = "lm", se = FALSE)+theme_classic()+
+  ylab("Back leaf area in 1992") +xlab("Back leaf area in 1991")+ scale_color_discrete(name="Sexual status in 1990")
+
+ggarrange(a,b,c,d,e,f,g, nrow=4, ncol=2, common.legend = TRUE, legend = "bottom", labels="AUTO", label.x=0.15, hjust=0)
+
+ggdraw() +
+  draw_plot(a, x=0, y=0.75, width=0.5, height=0.25)+
+  draw_plot(c, x=0, y=0.5, width=0.5, height=0.25)+
+  draw_plot(e, x=0, y=0.25, width=0.5, height=0.25)+
+  draw_plot(g, x=0, y=0, width=0.5, height=0.25)+
+  draw_plot(b, x=0.5, y=0.75, width=0.5, height=0.25)+
+  draw_plot(d, x=0.5, y=0.5, width=0.5, height=0.25)+
+  draw_plot(f, x=0.5, y=0.25, width=0.5, height=0.25)
+```
+
+
+
+## Figure S2
 
 ```{r}
 mayappleData92 <- mayappleData91 %>% 
