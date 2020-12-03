@@ -124,7 +124,7 @@ Read in data, select variables from the front of the system. Also filtering out 
 mayappleDatasetFull<-readxl::read_excel("mayapple_1990.xlsx", na=".")
 
 mayappleData <- mayappleDatasetFull %>% 
-  dplyr::select(COLONY,Lf_90,brnoF_91,Sex_90,Sever,Time,SexF1_91,SexF2_91,SexF3_91,LfFtot_91) %>% 
+  dplyr::select(COLONY,Lf_90,brnoF_91,Sex_90,Sever,Time,LfFtot_91) %>% 
   filter(!is.na(Lf_90))
 
 mayappleData<- mayappleData %>% 
@@ -179,7 +179,7 @@ Read in data, select relevant variables. Convert response to numeric, remove NA 
 mayappleDatasetFull<-readxl::read_excel("mayapple_1990.xlsx", na=".")
 
 mayappleData <- mayappleDatasetFull %>% 
-  dplyr::select(COLONY,Lf_90,brnoF_91,Sex_90,Sever,Time,SexF1_91,SexF2_91,SexF3_91,LfFtot_91) %>% 
+  dplyr::select(COLONY,Lf_90,brnoF_91,Sex_90,Sever,Time,LfFtot_91) %>% 
   filter(!is.na(Lf_90))
 
 mayappleData$LfFtot_91<-as.numeric(mayappleData$LfFtot_91)
@@ -233,7 +233,7 @@ Read in data, select relevant variables, filter out records with zero leaf area 
 mayappleDatasetFull<-readxl::read_excel("mayapple_1990.xlsx", na=".")
 
 mayappleData <- mayappleDatasetFull %>% 
-  dplyr::select(COLONY,Lf_90,Sex_90,Sever,Time,brnoB_91,LfB1_91,SexB1_91,LfB2_91,SexB2_91,LfBtot_91,Lftot_91) %>% 
+  dplyr::select(COLONY,Lf_90,Sex_90,Sever,Time,brnoB_91,LfB1_91,LfBtot_91,Lftot_91) %>% 
   filter(!is.na(Lf_90))
 
 mayappleData<- mayappleData %>% 
@@ -288,7 +288,7 @@ Read in data, select relevant variables. Convert response to numeric, remove NA 
 mayappleDatasetFull<-readxl::read_excel("mayapple_1990.xlsx", na=".")
 
 mayappleData <- mayappleDatasetFull %>% 
-  dplyr::select(COLONY,Lf_90,Sex_90,Sever,Time,brnoB_91,LfB1_91,SexB1_91,LfB2_91,SexB2_91,LfBtot_91,Lftot_91) %>% 
+  dplyr::select(COLONY,Lf_90,Sex_90,Sever,Time,brnoB_91,LfB1_91,LfBtot_91,Lftot_91) %>% 
   filter(!is.na(Lf_90))
 
 mayappleData$LfBtot_91<-as.numeric(mayappleData$LfBtot_91)
