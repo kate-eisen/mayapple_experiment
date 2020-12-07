@@ -1,0 +1,24 @@
+﻿Column letter,Column Name,Description,Type,Levels or units,Notes
+A,COLONY,Colony number,Numeric ID,NA,
+B,PlantID,Plant ID number,Numeric ID,NA,
+C,Sex_90,Sexual status of shoot in 1990,Factor,S: sexual; V: vegetative,
+D,Sever,Location of experimental severing,Factor,C: control; S1: sever behind 1990 shoot; S2: sever behind 1989 shoot; S4: sever behind 1987 shoot,
+E,Time,Timing of experimental severing,Factor,"T1: April 15-20, 1990; T2: June 25-30, 1990; T3: September 5-10, 1990",
+F,Lf_90,Leaf area of the 1990 shoot,Numeric,cm2,
+G,ST-BOR-90,Presence of damage by stem boring larvae,Boolean,Y: damaged; N: not damaged,
+H,DMG-90,Presence of other types of damage,Boolean,Y: damaged; N: not damaged,
+I,Total_nodes,Total number of nodes/rhizome segments on main system,Count,NA,A value of 11 indicates that the total number was not known and the system had more segments than 5
+J,SexF_91,Overall sexual status of the front system in 1991,Factor,S: one or more shoots were sexual; V: all shoots were vegetative; NA: no active shoots,
+K,brnoF_91,Number of branches produced by front system in 1991,Count,NA,Used to analyze shoot production in analyses
+L,SexB_91,Overall sexual status of the back system in 1991,Factor,S: one or more shoots were sexual; V: all shoots were vegetative; NA: no active shoots,
+M,brnoB_91,Number of branches produced by back system in 1991,Count,NA,Used to analyze shoot production in analyses
+N,LfFtot_91,Leaf area of the 1991 front shoot,Numeric,cm2,NA values indicate a shoot was produced but leaf area was not measured
+O,LfBtot_91,Leaf area of the 1991 back shoot,Numeric,cm2,NA values indicate a shoot was produced but leaf area was not measured
+P,Lftot_91,Total leaf area of the 1991 front and back shoots,Numeric,cm2,NA values indicate a shoot was produced but leaf area was not measured (in front and/or back system)
+Q,SexF_92,Overall sexual status of the front system in 1992,Factor,S: one or more shoots were sexual; V: all shoots were vegetative; NAN: no active shoots; NA: system was not measured in 1992,
+R,brnoF_92,Number of branches produced by front system in 1992,Count,NA,NA values indicate the system was not measured in 1992
+S,SexB_92,Overall sexual status of the back system in 1992,Factor,S: one or more shoots were sexual; V: all shoots were vegetative; NAN: no active shoots; NA: system was not measured in 1992,
+T,brnoB_92,Number of branches produced by back system in 1992,Count,NA,NA values indicate the system was not measured in 1992
+U,LftotF_92,Leaf area of the 1992 front shoot,Numeric,cm2,NA values indicate the system was not measured in 1992
+V,LftotB_92,Leaf area of the 1992 back shoot,Numeric,cm2,NA values indicate the system was not measured in 1992
+W,Lftot_92,Total leaf area of the 1992 front and back shoots,Numeric,cm2,NA values indicate the system was not measured in 1992
