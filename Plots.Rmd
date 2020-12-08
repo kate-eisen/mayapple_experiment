@@ -17,6 +17,9 @@ library(readxl)
 library(cowplot)
 library(mdthemes)
 library(ggpubr)
+library(lme4)
+library(emmeans)
+library(glmmTMB)
 ```
 
 ## Figure 1
@@ -58,7 +61,7 @@ mayappleDatasetFull<-readxl::read_excel("mayapple_1990.xlsx", na=".")
 
 # select variables for analysis and filter out rows that don't have a leaf area recorded in 1990
 mayappleData <- mayappleDatasetFull %>% 
-  dplyr::select(COLONY,Lf_90,brnoF_91,Sex_90,Sever,Time,SexF1_91,SexF2_91,SexF3_91,LfFtot_91) %>% 
+  dplyr::select(COLONY,Lf_90,brnoF_91,Sex_90,Sever,Time,LfFtot_91) %>% 
   filter(!is.na(Lf_90))
 
 # create binary variable for plants that are dead/have no branches (0) or have 1 or more branches (1)
@@ -111,7 +114,7 @@ Working with back shoot production in 1991:
 mayappleDatasetFull<-readxl::read_excel("mayapple_1990.xlsx", na=".")
 
 mayappleData <- mayappleDatasetFull %>% 
-  dplyr::select(COLONY,Lf_90,Sex_90,Sever,Time,brnoB_91,LfB1_91,SexB1_91,LfB2_91,SexB2_91,LfBtot_91,Lftot_91) %>% 
+  dplyr::select(COLONY,Lf_90,Sex_90,Sever,Time,brnoB_91,LfBtot_91,Lftot_91) %>% 
   filter(!is.na(Lf_90))
 
 mayappleData<- mayappleData %>% 
@@ -224,7 +227,7 @@ ggdraw(b) +
 mayappleDatasetFull<-readxl::read_excel("mayapple_1990.xlsx", na=".")
 
 mayappleData <- mayappleDatasetFull %>% 
-  dplyr::select(COLONY,Lf_90,brnoF_91,Sex_90,Sever,Time,SexF1_91,SexF2_91,SexF3_91,LfFtot_91) %>% 
+  dplyr::select(COLONY,Lf_90,brnoF_91,Sex_90,Sever,Time,LfFtot_91) %>% 
   filter(!is.na(Lf_90))
 
 mayappleData$LfFtot_91<-as.numeric(mayappleData$LfFtot_91)
@@ -241,7 +244,7 @@ a <- ggplot(data=mayappleData, aes(x=Lf_90, y=LfFtot_91, color=Sex_90)) +
 mayappleDatasetFull<-readxl::read_excel("mayapple_1990.xlsx", na=".")
 
 mayappleData <- mayappleDatasetFull %>% 
-  dplyr::select(COLONY,Lf_90,Sex_90,Sever,Time,brnoB_91,LfB1_91,SexB1_91,LfB2_91,SexB2_91,LfBtot_91,Lftot_91) %>% 
+  dplyr::select(COLONY,Lf_90,Sex_90,Sever,Time,brnoB_91,LfBtot_91,Lftot_91) %>% 
   filter(!is.na(Lf_90))
 
 mayappleData<- mayappleData %>% 
@@ -330,7 +333,8 @@ mayappleData92 <- mayappleData91 %>%
                                              LftotF_92==0 & LftotB_92!=0 ~"One",
                                              LftotF_92!=0 & LftotB_92==0 ~"One",
                                              LftotF_92==0 & LftotB_92==0 ~"None")) %>% 
-  mutate(Status = factor(Status, levels=c("None", "One", "Two"))) %>% 
+  mutate(Status = factor(Status, levels=c("None", "One", "Two")))
+
   mayappleData92 <- mayappleData92 %>% filter(Status != "None") %>% 
   mutate(Lf92s=ifelse(Status=="Two", Lftot_92/2, Lftot_92)) 
 
