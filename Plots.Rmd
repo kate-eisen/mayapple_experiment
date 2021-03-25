@@ -27,16 +27,16 @@ library(glmmTMB)
 
 ### Panels A to C
 
-Working with leaf area in 1990:
+Working with leaf area in year $t$:
 ```{r, warning=FALSE, message=FALSE}
-may<-read_csv("mayapple_1990.csv", na=".")
+may<-read_csv("mayapple.csv", na=".")
 ##need to make the variables we are working with numeric:
-may$Lf_90<-as.numeric(as.character(may$Lf_90))
+may$Lf_t<-as.numeric(as.character(may$Lf_t))
 
 may<-may %>% 
-  filter(!is.na(Lf_90))
+  filter(!is.na(Lf_t))
 
-model.bm<-lmer(Lf_90~Sex_90*Time+Sever*Time+(1|COLONY), data=may, na.action = "na.fail", REML=FALSE)
+model.bm<-lmer(Lf_t~Sex_t*Time+Sever*Time+(1|COLONY), data=may, na.action = "na.fail", REML=FALSE)
 ```
 
 Drawing panels:
@@ -44,7 +44,7 @@ Drawing panels:
 ```{r, warning=FALSE, message=FALSE}
 
 Sever_1 <- emmip(model.bm,  ~ Sever ,CIs = TRUE)+xlab("")+mdthemes::md_theme_classic() +ggtitle("**Sever**  
-                                                                                                         *Leaf area in 1990*")
+                                                                                                         *Leaf area in year t*")
 Time_1 <- emmip(model.bm,  ~ Time ,CIs = TRUE)+xlab("")+ylab("")+mdthemes::md_theme_classic() +ggtitle("**Time**") 
 
 Int_1 <- emmip(model.bm, Time  ~ Sever  ,CIs = TRUE)+xlab("")+ylab("")+mdthemes::md_theme_classic()+ggtitle("**Sever x Time**")
@@ -52,23 +52,23 @@ Int_1 <- emmip(model.bm, Time  ~ Sever  ,CIs = TRUE)+xlab("")+ylab("")+mdthemes:
 
 ### Panels D and E
 
-Working with front shoot production in 1991:
+Working with front shoot production in year $t+1$:
 
 ```{r}
 # set na.strings="." to recode '.' to NA
-mayappleDatasetFull<-read_csv("mayapple_1990.csv", na=".")
+mayappleDatasetFull<-read_csv("mayapple.csv", na=".")
 
-# select variables for analysis and filter out rows that don't have a leaf area recorded in 1990
+# select variables for analysis and filter out rows that don't have a leaf area recorded in year t
 mayappleData <- mayappleDatasetFull %>% 
-  dplyr::select(COLONY,Lf_90,brnoF_91,Sex_90,Sever,Time,LfFtot_91) %>% 
-  filter(!is.na(Lf_90))
+  dplyr::select(COLONY,Lf_t,brnoF_t1,Sex_t,Sever,Time,LfFtot_t1) %>% 
+  filter(!is.na(Lf_t))
 
 # create binary variable for plants that are dead/have no branches (0) or have 1 or more branches (1)
 # append new variable to the dataframe
 mayappleData<- mayappleData %>% 
-  dplyr::mutate(deadAliveBinary=ifelse(brnoF_91>0,1,0))
+  dplyr::mutate(deadAliveBinary=ifelse(brnoF_t1>0,1,0))
 
-sur_91f_bm<-glmmTMB(deadAliveBinary~ Sever+Time +  (1|COLONY), data = mayappleData,
+sur_t1f_bm<-glmmTMB(deadAliveBinary~ Sever+Time +  (1|COLONY), data = mayappleData,
                 family="binomial")
 
 
@@ -77,81 +77,81 @@ sur_91f_bm<-glmmTMB(deadAliveBinary~ Sever+Time +  (1|COLONY), data = mayappleDa
 Drawing panels:
 
 ```{r}
-Sever_2 <- emmip(sur_91f_bm,   ~ Sever  , type="response",CIs = TRUE)+xlab("")+ylab("Predicted probability")+mdthemes::md_theme_classic()+ggtitle("*Front survival in 1991*")
+Sever_2 <- emmip(sur_t1f_bm,   ~ Sever  , type="response",CIs = TRUE)+xlab("")+ylab("Predicted probability")+mdthemes::md_theme_classic()+ggtitle("*Front survival in year t+1*")
 
-Time_2 <- emmip(sur_91f_bm,   ~ Time  ,type="response",CIs = TRUE)+xlab("")+ylab("")+mdthemes::md_theme_classic()
+Time_2 <- emmip(sur_t1f_bm,   ~ Time  ,type="response",CIs = TRUE)+xlab("")+ylab("")+mdthemes::md_theme_classic()
 ```
 
 ### Panel F
 
-Working with front leaf area in 1991, using systems with a non-zero leaf area in 1991.
+Working with front leaf area in year $t+1$, using systems with a non-zero leaf area in year $t+1$.
 
 ```{r, warning=FALSE, message=FALSE}
-mayappleData$LfFtot_91<-as.numeric(mayappleData$LfFtot_91)
+mayappleData$LfFtot_t1<-as.numeric(mayappleData$LfFtot_t1)
 
 mayappleData <- mayappleData %>% 
-  filter(!is.na(LfFtot_91)) %>% 
-  filter(LfFtot_91>0)
+  filter(!is.na(LfFtot_t1)) %>% 
+  filter(LfFtot_t1>0)
 
-mod91laf.bm<-lmer(LfFtot_91~Sever+Lf_90 +(1|COLONY), data = mayappleData, na.action ="na.fail", REML=FALSE)
+mod_t1laf.bm<-lmer(LfFtot_t1~Sever+Lf_t +(1|COLONY), data = mayappleData, na.action ="na.fail", REML=FALSE)
 
 ```
 
 Drawing panel:
 
 ```{r}
-Sever_3 <- emmip(mod91laf.bm,   ~ Sever  ,CIs = TRUE)+xlab("")+mdthemes::md_theme_classic()+ggtitle("*Front leaf area in 1991*")
+Sever_3 <- emmip(mod_t1laf.bm,   ~ Sever  ,CIs = TRUE)+xlab("")+mdthemes::md_theme_classic()+ggtitle("*Front leaf area in year t+1*")
 
 ```
 
 ### Panels G and H
 
-Working with back shoot production in 1991:
+Working with back shoot production in year $t+1$:
 
 ```{r}
 # set na.strings="." to recode '.' to NA
-mayappleDatasetFull<-read_csv("mayapple_1990.csv", na=".")
+mayappleDatasetFull<-read_csv("mayapple.csv", na=".")
 
 mayappleData <- mayappleDatasetFull %>% 
-  dplyr::select(COLONY,Lf_90,Sex_90,Sever,Time,brnoB_91,LfBtot_91,Lftot_91) %>% 
-  filter(!is.na(Lf_90))
+  dplyr::select(COLONY,Lf_t,Sex_t,Sever,Time,brnoB_t1,LfBtot_t1,Lftot_t1) %>% 
+  filter(!is.na(Lf_t))
 
 mayappleData<- mayappleData %>% 
-  dplyr::mutate(backShootBranchBinary=ifelse(brnoB_91>0,1,0)) %>% 
+  dplyr::mutate(backShootBranchBinary=ifelse(brnoB_t1>0,1,0)) %>% 
   filter(!is.na(backShootBranchBinary))
 
-sur_91b_bm<-glmmTMB(backShootBranchBinary~ Sever+Time + Lf_90 +(1|COLONY), data = mayappleData,
+sur_t1b_bm<-glmmTMB(backShootBranchBinary~ Sever+Time + Lf_t +(1|COLONY), data = mayappleData,
                 family="binomial")
 ```
 
 Drawing panels:
 
 ```{r}
-Sever_4 <- emmip(sur_91b_bm,   ~ Sever  ,type="response",CIs = TRUE )+xlab("")+ylab("Predicted probability")+mdthemes::md_theme_classic()+ggtitle("*Back shoot production in 1991*")
+Sever_4 <- emmip(sur_t1b_bm,   ~ Sever  ,type="response",CIs = TRUE )+xlab("")+ylab("Predicted probability")+mdthemes::md_theme_classic()+ggtitle("*Back shoot production in year t+1*")
 
-Time_4 <- emmip(sur_91b_bm,   ~ Time  ,type="response",CIs = TRUE )+xlab("")+ylab("")+mdthemes::md_theme_classic()
+Time_4 <- emmip(sur_t1b_bm,   ~ Time  ,type="response",CIs = TRUE )+xlab("")+ylab("")+mdthemes::md_theme_classic()
 ```
 
 ### Panels I and J:
 
-Working with leaf area of the back of the system in 1991, for those systems with non-zero leaf area in the back in 1991.
+Working with leaf area of the back of the system in year $t+1$, for those systems with non-zero leaf area in the back in year $t+1$.
 
 ```{r}
-mayappleData$LfBtot_91<-as.numeric(mayappleData$LfBtot_91)
+mayappleData$LfBtot_t1<-as.numeric(mayappleData$LfBtot_t1)
 
 mayappleData <- mayappleData %>% 
-  filter(!is.na(LfBtot_91)) %>% 
-  filter(LfBtot_91>0)
+  filter(!is.na(LfBtot_t1)) %>% 
+  filter(LfBtot_t1>0)
 
-b_mod91la.bm<-lmer(LfBtot_91~Sex_90+Sever+Time +Lf_90+(1|COLONY), data = mayappleData, na.action ="na.fail", REML=FALSE)
+b_mod_t1la.bm<-lmer(LfBtot_t1~Sex_t+Sever+Time +Lf_t+(1|COLONY), data = mayappleData, na.action ="na.fail", REML=FALSE)
 
 ```
 
 Drawing panels:
 
 ```{r}
-Sever_5 <- emmip(b_mod91la.bm,  ~ Sever  ,CIs = TRUE )+mdthemes::md_theme_classic()+ggtitle("*Back leaf area in 1991*")
-Time_5 <- emmip(b_mod91la.bm,  ~ Time  ,CIs = TRUE )+ylab("")+mdthemes::md_theme_classic()
+Sever_5 <- emmip(b_mod_t1la.bm,  ~ Sever  ,CIs = TRUE )+mdthemes::md_theme_classic()+ggtitle("*Back leaf area in year t+1*")
+Time_5 <- emmip(b_mod_t1la.bm,  ~ Time  ,CIs = TRUE )+ylab("")+mdthemes::md_theme_classic()
 ```
 
 
@@ -175,38 +175,38 @@ ggdraw() +
 ## Figure 2
 
 ```{r}
-mayappleDatasetFull<-read_csv("mayapple_1990.csv", na=".")
+mayappleDatasetFull<-read_csv("mayapple.csv", na=".")
 
 
-mayappleData91 <- mayappleDatasetFull %>% 
-  dplyr::select(COLONY,Lf_90,Sex_90,Sever,Time, 
-                LfFtot_91, LfBtot_91, Lftot_91,
-                LftotF_92, LftotB_92, Lftot_92,
-                brnoF_91, brnoB_91,
-                brnoF_92, brnoB_92) %>% 
-  mutate(Lftot_92=parse_double(Lftot_92), Lftot_91=parse_double(Lftot_91)) %>% 
-  mutate(LftotB_92=parse_double(LftotB_92), LfBtot_91=parse_double(LfBtot_91) ) %>% 
-  mutate(LftotF_92=parse_double(LftotF_92), LfFtot_91=parse_double(LfFtot_91) ) %>% 
-  mutate(brnoF_92=parse_double(brnoF_92), brnoB_92=parse_double(brnoB_92) ) %>% 
-  filter(!is.na(Lf_90)) %>% 
-  filter(!is.na(Lftot_91)) %>% 
-mutate(Status = case_when(LfFtot_91!=0 & LfBtot_91!=0 ~"Two",
-                                             LfFtot_91==0 & LfBtot_91!=0 ~"One",
-                                             LfFtot_91!=0 & LfBtot_91==0 ~"One",
-                                             LfFtot_91==0 & LfBtot_91==0 ~"None")) %>% 
+mayappleData_t1 <- mayappleDatasetFull %>% 
+  dplyr::select(COLONY,Lf_t,Sex_t,Sever,Time, 
+                LfFtot_t1, LfBtot_t1, Lftot_t1,
+                LftotF_t2, LftotB_t2, Lftot_t2,
+                brnoF_t1, brnoB_t1,
+                brnoF_t2, brnoB_t2) %>% 
+  mutate(Lftot_t2=parse_double(Lftot_t2), Lftot_t1=parse_double(Lftot_t1)) %>% 
+  mutate(LftotB_t2=parse_double(LftotB_t2), LfBtot_t1=parse_double(LfBtot_t1) ) %>% 
+  mutate(LftotF_t2=parse_double(LftotF_t2), LfFtot_t1=parse_double(LfFtot_t1) ) %>% 
+  mutate(brnoF_t2=parse_double(brnoF_t2), brnoB_t2=parse_double(brnoB_t2) ) %>% 
+  filter(!is.na(Lf_t)) %>% 
+  filter(!is.na(Lftot_t1)) %>% 
+mutate(Status = case_when(LfFtot_t1!=0 & LfBtot_t1!=0 ~"Two",
+                                             LfFtot_t1==0 & LfBtot_t1!=0 ~"One",
+                                             LfFtot_t1!=0 & LfBtot_t1==0 ~"One",
+                                             LfFtot_t1==0 & LfBtot_t1==0 ~"None")) %>% 
   mutate(Status = factor(Status, levels=c("None", "One", "Two"))) %>% 
  filter(Status != "None") %>% 
-  mutate(Lf91s=ifelse(Status=="Two", Lftot_91/2, Lftot_91)) 
+  mutate(Lf_t1s=ifelse(Status=="Two", Lftot_t1/2, Lftot_t1)) 
 
-s91mod1<-lmer(Lftot_91~Status*Sever+(1|COLONY), data = mayappleData91)
-a<-emmip(s91mod1, Sever~Status  ,CIs = TRUE)+ ylab("Total leaf area")+ 
+s_t1mod1<-lmer(Lftot_t1~Status*Sever+(1|COLONY), data = mayappleData_t1)
+a<-emmip(s_t1mod1, Sever~Status  ,CIs = TRUE)+ ylab("Total leaf area")+ 
   theme_bw()+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+xlab("")+theme(legend.position = "none")+theme(panel.border = element_blank(), axis.line = element_line())
 
-counts<-mayappleData91 %>% group_by(Status, Sever) %>% 
+counts<-mayappleData_t1 %>% group_by(Status, Sever) %>% 
   count(N=length(Sever))
 
-s91mod2<-lmer(Lf91s~Status*Sever+(1|COLONY), data = mayappleData91)
-b<-emmip(s91mod2, Sever~Status  ,CIs = TRUE)+ ylab("Average leaf area per system")+ 
+s_t1mod2<-lmer(Lf_t1s~Status*Sever+(1|COLONY), data = mayappleData_t1)
+b<-emmip(s_t1mod2, Sever~Status  ,CIs = TRUE)+ ylab("Average leaf area per system")+ 
   theme_bw()+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+scale_y_continuous(limits=c(-250, 1500))+ geom_text(data=counts, aes(x=Status, y=N, label=N, color=Sever))
 
 
@@ -222,92 +222,92 @@ ggdraw(b) +
 
 
 
-#This is 1991 front leaf area. We need to do this for all of the response variables discussed for Q3
-mayappleDatasetFull<-read_csv("mayapple_1990.csv", na=".")
+#This is year t+1 front leaf area. We need to do this for all of the response variables discussed for Q3
+mayappleDatasetFull<-read_csv("mayapple.csv", na=".")
 
 mayappleData <- mayappleDatasetFull %>% 
-  dplyr::select(COLONY,Lf_90,brnoF_91,Sex_90,Sever,Time,LfFtot_91) %>% 
-  filter(!is.na(Lf_90))
+  dplyr::select(COLONY,Lf_t,brnoF_t1,Sex_t,Sever,Time,LfFtot_t1) %>% 
+  filter(!is.na(Lf_t))
 
-mayappleData$LfFtot_91<-as.numeric(mayappleData$LfFtot_91)
+mayappleData$LfFtot_t1<-as.numeric(mayappleData$LfFtot_t1)
 
 mayappleData <- mayappleData %>% 
-  filter(!is.na(LfFtot_91))
+  filter(!is.na(LfFtot_t1))
 
-a <- ggplot(data=mayappleData, aes(x=Lf_90, y=LfFtot_91, color=Sex_90)) +
+a <- ggplot(data=mayappleData, aes(x=Lf_t, y=LfFtot_t1, color=Sex_t)) +
   geom_point() + geom_smooth(method = "lm", se = FALSE)+theme_classic()+
-  ylab("Front leaf area in 1991") +xlab("Leaf area in 1990")+ scale_color_discrete(name="Sexual status in 1990")
+  ylab("Front leaf area in year t+1") +xlab("Leaf area in year t")+ scale_color_discrete(name="Sexual status in year t")
 
-#1991 back shoot production
+# year t+1 back shoot production
 
-mayappleDatasetFull<-read_csv("mayapple_1990.csv", na=".")
+mayappleDatasetFull<-read_csv("mayapple.csv", na=".")
 
 mayappleData <- mayappleDatasetFull %>% 
-  dplyr::select(COLONY,Lf_90,Sex_90,Sever,Time,brnoB_91,LfBtot_91,Lftot_91) %>% 
-  filter(!is.na(Lf_90))
+  dplyr::select(COLONY,Lf_t,Sex_t,Sever,Time,brnoB_t1,LfBtot_t1,Lftot_t1) %>% 
+  filter(!is.na(Lf_t))
 
 mayappleData<- mayappleData %>% 
-  dplyr::mutate(backShootBranchBinary=ifelse(brnoB_91>0,1,0)) %>% 
+  dplyr::mutate(backShootBranchBinary=ifelse(brnoB_t1>0,1,0)) %>% 
   filter(!is.na(backShootBranchBinary))
 
-b <- ggplot(data=mayappleData, aes(x=Lf_90, y=backShootBranchBinary, color=Sex_90)) +
+b <- ggplot(data=mayappleData, aes(x=Lf_t, y=backShootBranchBinary, color=Sex_t)) +
   geom_point() + geom_smooth(method = "lm", se = FALSE)+theme_classic()+
-  ylab("Probability of producing \n back shoot in 1991")  +xlab("Leaf area in 1990")+ scale_color_discrete(name="Sexual status in 1990")
+  ylab("Probability of producing \n back shoot in year t+1")  +xlab("Leaf area in year t")+ scale_color_discrete(name="Sexual status in year t")
 
 
-#1991 back leaf area
+# year t+1 back leaf area
 
-mayappleData$LfBtot_91<-as.numeric(mayappleData$LfBtot_91)
+mayappleData$LfBtot_t1<-as.numeric(mayappleData$LfBtot_t1)
 
 mayappleData <- mayappleData %>% 
-  filter(!is.na(LfBtot_91)) %>% 
-  filter(LfBtot_91>0)
+  filter(!is.na(LfBtot_t1)) %>% 
+  filter(LfBtot_t1>0)
 
-c <- ggplot(data=mayappleData, aes(x=Lf_90, y=LfBtot_91, color=Sex_90)) +
+c <- ggplot(data=mayappleData, aes(x=Lf_t, y=LfBtot_t1, color=Sex_t)) +
   geom_point() + geom_smooth(method = "lm", se = FALSE)+theme_classic()+
-  ylab("Back leaf area in 1991")  +xlab("Leaf area in 1990")+ scale_color_discrete(name="Sexual status in 1990")
+  ylab("Back leaf area in year t+1")  +xlab("Leaf area in year t")+ scale_color_discrete(name="Sexual status in year t")
 
 
-#1992 front leaf area
+# year t+2 front leaf area
 
-#need leaf 90 and front leaf 91
+# need leaf year t and front leaf year t+1
 
-mayappleDatasetFull<-read_csv("mayapple_1990.csv", na=".")
+mayappleDatasetFull<-read_csv("mayapple.csv", na=".")
 
 mayappleData <- mayappleDatasetFull %>% 
-  dplyr::select(COLONY,Lf_90,Sex_90,Sever,Time,LftotF_92, Lftot_91, LfBtot_91, LfFtot_91) %>% 
-  mutate(LftotF_92=parse_double(LftotF_92), Lftot_91=parse_double(Lftot_91), LfBtot_91=parse_double(LfBtot_91), LfFtot_91=parse_double(LfFtot_91) ) %>% 
-  filter(!is.na(Lf_90)) %>% 
-  filter(!is.na(Lftot_91)) %>% 
-  filter(!is.na(LftotF_92))
+  dplyr::select(COLONY,Lf_t,Sex_t,Sever,Time,LftotF_t2, Lftot_t1, LfBtot_t1, LfFtot_t1) %>% 
+  mutate(LftotF_t2=parse_double(LftotF_t2), Lftot_t1=parse_double(Lftot_t1), LfBtot_t1=parse_double(LfBtot_t1), LfFtot_t1=parse_double(LfFtot_t1) ) %>% 
+  filter(!is.na(Lf_t)) %>% 
+  filter(!is.na(Lftot_t1)) %>% 
+  filter(!is.na(LftotF_t2))
 
-d <- ggplot(data=mayappleData, aes(x=Lf_90, y=LftotF_92, color=Sex_90)) +
+d <- ggplot(data=mayappleData, aes(x=Lf_t, y=LftotF_t2, color=Sex_t)) +
   geom_point() + geom_smooth(method = "lm", se = FALSE)+theme_classic()+
-  ylab("Front leaf area in 1992") +xlab("Leaf area in 1990")+ scale_color_discrete(name="Sexual status in 1990")
+  ylab("Front leaf area in year t+2") +xlab("Leaf area in year t")+ scale_color_discrete(name="Sexual status in year t")
 
-e <- ggplot(data=mayappleData, aes(x=LfFtot_91, y=LftotF_92, color=Sex_90)) +
+e <- ggplot(data=mayappleData, aes(x=LfFtot_t1, y=LftotF_t2, color=Sex_t)) +
   geom_point() + geom_smooth(method = "lm", se = FALSE)+theme_classic()+
-  ylab("Front leaf area in 1992") +xlab("Front leaf area in 1991")+ scale_color_discrete(name="Sexual status in 1990")
+  ylab("Front leaf area in year t+2") +xlab("Front leaf area in year t+1")+ scale_color_discrete(name="Sexual status in year t")
 
 
-#1992 back leaf area
+# year t+2 back leaf area
 
-mayappleDatasetFull<-read_csv("mayapple_1990.csv", na=".")
+mayappleDatasetFull<-read_csv("mayapple.csv", na=".")
 
 mayappleData <- mayappleDatasetFull %>% 
-  dplyr::select(COLONY,Lf_90,Sex_90,Sever,Time,LftotB_92, Lftot_91, LfBtot_91, LfFtot_91) %>% 
-  mutate(LftotB_92=parse_double(LftotB_92), Lftot_91=parse_double(Lftot_91), LfBtot_91=parse_double(LfBtot_91), LfFtot_91=parse_double(LfFtot_91) ) %>% 
-  filter(!is.na(Lf_90)) %>% 
-  filter(!is.na(Lftot_91)) %>% 
-  filter(!is.na(LftotB_92))
+  dplyr::select(COLONY,Lf_t,Sex_t,Sever,Time,LftotB_t2, Lftot_t1, LfBtot_t1, LfFtot_t1) %>% 
+  mutate(LftotB_t2=parse_double(LftotB_t2), Lftot_t1=parse_double(Lftot_t1), LfBtot_t1=parse_double(LfBtot_t1), LfFtot_t1=parse_double(LfFtot_t1) ) %>% 
+  filter(!is.na(Lf_t)) %>% 
+  filter(!is.na(Lftot_t1)) %>% 
+  filter(!is.na(LftotB_t2))
 
-f <- ggplot(data=mayappleData, aes(x=Lf_90, y=LftotB_92, color=Sex_90)) +
+f <- ggplot(data=mayappleData, aes(x=Lf_t, y=LftotB_t2, color=Sex_t)) +
   geom_point() + geom_smooth(method = "lm", se = FALSE)+theme_classic()+
-  ylab("Back leaf area in 1992") +xlab("Leaf area in 1990")+ scale_color_discrete(name="Sexual status in 1990")
+  ylab("Back leaf area in year t+2") +xlab("Leaf area in year t")+ scale_color_discrete(name="Sexual status in year t")
 
-g <- ggplot(data=mayappleData, aes(x=LfBtot_91, y=LftotB_92, color=Sex_90)) +
+g <- ggplot(data=mayappleData, aes(x=LfBtot_t1, y=LftotB_t2, color=Sex_t)) +
   geom_point() + geom_smooth(method = "lm", se = FALSE)+theme_classic()+
-  ylab("Back leaf area in 1992") +xlab("Back leaf area in 1991")+ scale_color_discrete(name="Sexual status in 1990")
+  ylab("Back leaf area in year t+2") +xlab("Back leaf area in year t+1")+ scale_color_discrete(name="Sexual status in year t")
 
 ggarrange(a,b,c,d,e,f,g, nrow=4, ncol=2, common.legend = TRUE, legend = "bottom", labels="AUTO", label.x=0.15, hjust=0)
 
@@ -326,27 +326,27 @@ ggdraw() +
 ## Figure S2
 
 ```{r}
-mayappleData92 <- mayappleData91 %>% 
-  filter(!is.na(Lftot_92)) %>% 
-  mutate(Status = case_when(LftotF_92!=0 & LftotB_92!=0 ~"Two",
-                                             LftotF_92==0 & LftotB_92!=0 ~"One",
-                                             LftotF_92!=0 & LftotB_92==0 ~"One",
-                                             LftotF_92==0 & LftotB_92==0 ~"None")) %>% 
+mayappleData_t2 <- mayappleData_t1 %>% 
+  filter(!is.na(Lftot_t2)) %>% 
+  mutate(Status = case_when(LftotF_t2!=0 & LftotB_t2!=0 ~"Two",
+                                             LftotF_t2==0 & LftotB_t2!=0 ~"One",
+                                             LftotF_t2!=0 & LftotB_t2==0 ~"One",
+                                             LftotF_t2==0 & LftotB_t2==0 ~"None")) %>% 
   mutate(Status = factor(Status, levels=c("None", "One", "Two")))
 
-  mayappleData92 <- mayappleData92 %>% filter(Status != "None") %>% 
-  mutate(Lf92s=ifelse(Status=="Two", Lftot_92/2, Lftot_92)) 
+  mayappleData_t2 <- mayappleData_t2 %>% filter(Status != "None") %>% 
+  mutate(Lf_t2s=ifelse(Status=="Two", Lftot_t2/2, Lftot_t2)) 
 
 
-s92mod1<-lmer(Lftot_92~Status*Sever+(1|COLONY), data = mayappleData92)
-a<-emmip(s92mod1, Sever~Status  ,CIs = TRUE)+ ylab("Total leaf area")+ 
+s_t2mod1<-lmer(Lftot_t2~Status*Sever+(1|COLONY), data = mayappleData_t2)
+a<-emmip(s_t2mod1, Sever~Status  ,CIs = TRUE)+ ylab("Total leaf area")+ 
   theme_bw()+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+xlab("")+theme(legend.position = "none")+theme(panel.border = element_blank(), axis.line = element_line())
 
-counts<-mayappleData92 %>% group_by(Status, Sever) %>% 
+counts<-mayappleData_t2 %>% group_by(Status, Sever) %>% 
   count(N=length(Sever))
 
-s92mod2<-lmer(Lf92s~Status*Sever+(1|COLONY), data = mayappleData92)
-b<-emmip(s92mod2, Sever~Status  ,CIs = TRUE)+ ylab("Average leaf area per system")+ 
+s_t2mod2<-lmer(Lf_t2s~Status*Sever+(1|COLONY), data = mayappleData_t2)
+b<-emmip(s_t2mod2, Sever~Status  ,CIs = TRUE)+ ylab("Average leaf area per system")+ 
   theme_bw()+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+scale_y_continuous(limits=c(-250, 1500))+ geom_text(data=counts, aes(x=Status, y=N, label=N, color=Sever))
 
 ggdraw(b) +
