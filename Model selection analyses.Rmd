@@ -31,43 +31,43 @@ library(webshot)
 
 ## Questions and Analyses
 
-Model selection was performed on seven response variables that were measured between 1990 and 1992. 
+Model selection was performed on seven response variables that were measured between year $t$ and $t+2$ 
 
 *Q1: Do the position and timing of severing affect shoot performance in the year of severing and in the following year?*
 
 To address this question, we performed model selection on five response variables: 
-1. leaf area in 1990 (the year of severing)
-2. the production of a front shoot(s) in 1991 
-3. the total leaf area of the front system in 1991 (for systems with shoots in 1991) 
-4. the production of a back shoot(s) in 1991 
-5. the total leaf area of the back system in 1991 (for systems with shoots in 1991) 
+1. leaf area in year $t$ (the year of severing)
+2. the production of a front shoot(s) in year $t+1$ 
+3. the total leaf area of the front system in year $t+1$ (for systems with shoots in year $t+1$) 
+4. the production of a back shoot(s) in year $t+1$ 
+5. the total leaf area of the back system in year $t+1$ (for systems with shoots in year $t+1$) 
 
 *Q2: Do the position and timing of severing affect the ability of the back system to recover from damage by producing a back shoot?*
 
-To address this question, we used the model selection results from the analysis of back shoot production in 1991. (See #4 below)
+To address this question, we used the model selection results from the analysis of back shoot production in year $t+1$. (See #4 below)
 
 *Q3: In the years following the experimental severing, are there persistent effects of severing on plant performance or are these mediated through treatment effects on past years’ performance?*
 
-To address this question, we used the model selection results from the four 1991 response variables (see #2-#5 below) and two response variables that were measured in 1992: total leaf area of the front portion of the system in 1992 (#6), and total leaf area of the back portion of the sytem in 1992 (#7). 
+To address this question, we used the model selection results from the four year $t+1$ response variables (see #2-#5 below) and two response variables that were measured in year $t+2$: total leaf area of the front portion of the system in year $t+2$ (#6), and total leaf area of the back portion of the system in year $t+2$ (#7). 
 
 ### 1
 
-Leaf area in 1990
+Leaf area in year $t$
 
 Load data, make variable of interest numeric, filter out systems with zero leaf area:
-```{r load 1990, warning=FALSE, message=FALSE}
-may<-read_csv("mayapple_1990.csv",na=".")
+```{r load year_t, warning=FALSE, message=FALSE}
+may<-read_csv("mayapple.csv",na=".")
 
-may$Lf_90<-as.numeric(as.character(may$Lf_90))
+may$Lf_t<-as.numeric(as.character(may$Lf_t))
 
 may<-may %>% 
-  filter(!is.na(Lf_90))
+  filter(!is.na(Lf_t))
 ```
 
 Model specification:
 
 ```{r, warning=FALSE, message=FALSE}
-model<-lmer(Lf_90~Sex_90*Sever*Time+(1|COLONY), data=may, na.action = "na.fail", REML=FALSE)
+model<-lmer(Lf_t~Sex_t*Sever*Time+(1|COLONY), data=may, na.action = "na.fail", REML=FALSE)
 ```
 
 Model selection and creation of Table S1:
@@ -79,7 +79,7 @@ dr<-dredge(model)
 tabS1 <- head(dr, n=10) %>% gt() %>%
   fmt_number(columns = vars(`(Intercept)`, logLik, AICc, delta, weight), decimals = 2) %>% 
   tab_spanner(label = "Fit information", columns = vars(df, logLik, AICc, delta, weight)) %>% 
-  tab_spanner(label = "Non-fixed parameters", columns = vars(`(Intercept)`,  Sever, Sex_90, Time,  `Sever:Sex_90`, `Sever:Time`, `Sex_90:Time`, `Sever:Sex_90:Time`)) %>% 
+  tab_spanner(label = "Non-fixed parameters", columns = vars(`(Intercept)`,  Sever, Sex_t, Time,  `Sever:Sex_t`, `Sever:Time`, `Sex_t:Time`, `Sever:Sex_t:Time`)) %>% 
   tab_spanner(label = "Fixed parameter", columns = vars(`(Intercept)`)) %>% 
     tab_style(style = cell_fill(color = "lightgrey"), locations = cells_body(columns = everything(),rows = delta <= 2)) %>% 
   tab_style(style = cell_fill(color = "darkgrey"), locations = cells_body( columns = everything(), rows = 1)) 
@@ -89,14 +89,14 @@ tabS1 <- head(dr, n=10) %>% gt() %>%
 Specification of the best model:
 
 ```{r}
-model.bm<-lmer(Lf_90~Sex_90*Time+Sever*Time+(1|COLONY), data=may, na.action = "na.fail", REML=FALSE)
+model.bm<-lmer(Lf_t~Sex_t*Time+Sever*Time+(1|COLONY), data=may, na.action = "na.fail", REML=FALSE)
 ```
 
 Estimated marginal means for the main effects and interactions in the best model:
 
 ```{r}
-#Sex_90: 
-emmeans(model.bm, "Sex_90", type="response")
+#Sex_t: 
+emmeans(model.bm, "Sex_t", type="response")
 
 #Sever:
 emmeans(model.bm, pairwise~Sever, type="response")
@@ -104,8 +104,8 @@ emmeans(model.bm, pairwise~Sever, type="response")
 #Time:
 emmeans(model.bm, pairwise~Time, type="response")
 
-#Sex_90 x Time:
-emmeans(model.bm, pairwise~Time|Sex_90, type="response")
+#Sex_t x Time:
+emmeans(model.bm, pairwise~Time|Sex_t, type="response")
 
 #Sever x Time:
 emmeans(model.bm, pairwise~Time|Sever, type="response")
@@ -114,37 +114,37 @@ emmeans(model.bm, pairwise~Time|Sever, type="response")
 
 ### 2
 
-The production of a front shoot(s) in 1991
+The production of a front shoot(s) in year $t+1$
 
-Read in data, select variables from the front of the system. Also filtering out rows that don't have a leaf area record in 1990. Create binary variable for production of one or more front shoots in 1991. 
+Read in data, select variables from the front of the system. Also filtering out rows that don't have a leaf area record in year $t$. Create binary variable for production of one or more front shoots in year $t+1$. 
 
 ```{r}
 # set na.strings="." to recode '.' to NA
-mayappleDatasetFull<-read_csv("mayapple_1990.csv", na=".")
+mayappleDatasetFull<-read_csv("mayapple.csv", na=".")
 
 mayappleData <- mayappleDatasetFull %>% 
-  dplyr::select(COLONY,Lf_90,brnoF_91,Sex_90,Sever,Time,LfFtot_91) %>% 
-  filter(!is.na(Lf_90))
+  dplyr::select(COLONY,Lf_t,brnoF_t1,Sex_t,Sever,Time,LfFtot_t1) %>% 
+  filter(!is.na(Lf_t))
 
 mayappleData<- mayappleData %>% 
-  dplyr::mutate(deadAliveBinary=ifelse(brnoF_91>0,1,0))
+  dplyr::mutate(deadAliveBinary=ifelse(brnoF_t1>0,1,0))
 
 ```
 
 Specify global model, perform model selection, generate Table S2.
 
 ```{r, warning=FALSE, message=FALSE}
-mod91sur0l<-glmmTMB(deadAliveBinary~ Sex_90*Sever + Sex_90*Time + Sever*Time + Lf_90 + (1|COLONY), data = mayappleData,
+modt1sur0l<-glmmTMB(deadAliveBinary~ Sex_t*Sever + Sex_t*Time + Sever*Time + Lf_t + (1|COLONY), data = mayappleData,
                 family="binomial")
 
-dr<-dredge(mod91sur0l)
+dr<-dredge(modt1sur0l)
 
 tabS2 <- head(dr, n=10) %>% gt() %>% cols_hide(columns=vars(`disp((Int))`)) %>% 
-  cols_label(`cond((Int))`="(Intercept)", `cond(Lf_90)`="Lf_90", `cond(Sever)`="Sever", `cond(Sex_90)`="Sex_90", `cond(Time)`="Time", `cond(Sever:Sex_90)`="Sever:Sex_90", `cond(Sever:Time)`="Sever:Time", `cond(Sex_90:Time)`= "Sex_90:Time") %>% 
+  cols_label(`cond((Int))`="(Intercept)", `cond(Lf_t)`="Lf_t", `cond(Sever)`="Sever", `cond(Sex_t)`="Sex_t", `cond(Time)`="Time", `cond(Sever:Sex_t)`="Sever:Sex_t", `cond(Sever:Time)`="Sever:Time", `cond(Sex_t:Time)`= "Sex_t:Time") %>% 
   fmt_number(columns = vars(`cond((Int))`, logLik, AICc, delta, weight), decimals = 2) %>% 
-  fmt_number(columns = vars(`cond(Lf_90)`), decimals = 4) %>% 
+  fmt_number(columns = vars(`cond(Lf_t)`), decimals = 4) %>% 
   tab_spanner(label = "Fit information", columns = vars(df, logLik, AICc, delta, weight)) %>% 
-  tab_spanner(label = "Non-fixed parameters", columns = vars(`cond((Int))`,  `cond(Lf_90)`, `cond(Sever)`, `cond(Sex_90)`, `cond(Time)`, `cond(Sever:Sex_90)`, `cond(Sever:Time)`, `cond(Sex_90:Time)`)) %>% 
+  tab_spanner(label = "Non-fixed parameters", columns = vars(`cond((Int))`,  `cond(Lf_t)`, `cond(Sever)`, `cond(Sex_t)`, `cond(Time)`, `cond(Sever:Sex_t)`, `cond(Sever:Time)`, `cond(Sex_t:Time)`)) %>% 
   tab_spanner(label = "Fixed parameters", columns = vars(`cond((Int))`)) %>% 
     tab_style(style = cell_fill(color = "lightgrey"), locations = cells_body(columns = everything(),rows = delta <= 2)) %>% 
   tab_style(style = cell_fill(color = "darkgrey"), locations = cells_body( columns = everything(), rows = 2)) 
@@ -153,7 +153,7 @@ tabS2 <- head(dr, n=10) %>% gt() %>% cols_hide(columns=vars(`disp((Int))`)) %>%
 
 Specification of the best model:
 ```{r}
-sur_91f_bm<-glmmTMB(deadAliveBinary~ Sever+Time +  (1|COLONY), data = mayappleData,
+sur_t1f_bm<-glmmTMB(deadAliveBinary~ Sever+Time +  (1|COLONY), data = mayappleData,
                 family="binomial")
 ```
 
@@ -161,45 +161,45 @@ Estimated marginal means for the main effects:
 
 ```{r}
 #Sever:
-emmeans(sur_91f_bm, pairwise~Sever, type="response" )
+emmeans(sur_t1f_bm, pairwise~Sever, type="response" )
 
 #Time:
-emmeans(sur_91f_bm, pairwise~Time, type="response" )
+emmeans(sur_t1f_bm, pairwise~Time, type="response" )
 ```
 
 ### 3
 
-The total leaf area of the front system in 1991 (for systems with shoots in 1991) 
+The total leaf area of the front system in year $t+1$ (for systems with shoots in year $t+1$) 
 
-Read in data, select relevant variables. Convert response to numeric, remove NA values and select systems with non-zero back leaf area in 1991.
+Read in data, select relevant variables. Convert response to numeric, remove NA values and select systems with non-zero back leaf area in year $t+1$.
 
 ```{r}
 
-mayappleDatasetFull<-read_csv("mayapple_1990.csv", na=".")
+mayappleDatasetFull<-read_csv("mayapple.csv", na=".")
 
 mayappleData <- mayappleDatasetFull %>% 
-  dplyr::select(COLONY,Lf_90,brnoF_91,Sex_90,Sever,Time,LfFtot_91) %>% 
-  filter(!is.na(Lf_90))
+  dplyr::select(COLONY,Lf_t,brnoF_t1,Sex_t,Sever,Time,LfFtot_t1) %>% 
+  filter(!is.na(Lf_t))
 
-mayappleData$LfFtot_91<-as.numeric(mayappleData$LfFtot_91)
+mayappleData$LfFtot_t1<-as.numeric(mayappleData$LfFtot_t1)
 
 mayappleData <- mayappleData %>% 
-  filter(!is.na(LfFtot_91)) %>% 
-  filter(LfFtot_91>0)
+  filter(!is.na(LfFtot_t1)) %>% 
+  filter(LfFtot_t1>0)
 ```
 
 Specify global model, perform model selection, generate Table S3:
 
 ```{r, warning=FALSE, message=FALSE}
 
-mod91laf<-lmer(LfFtot_91~Sex_90*Sever*Time+Lf_90 +(1|COLONY), data = mayappleData, na.action ="na.fail", REML=FALSE)
+modt1laf<-lmer(LfFtot_t1~Sex_t*Sever*Time+Lf_t +(1|COLONY), data = mayappleData, na.action ="na.fail", REML=FALSE)
 
-dr<-dredge(mod91laf)
+dr<-dredge(modt1laf)
 
 tabS3 <- head(dr, n=10) %>% gt() %>%
-  fmt_number(columns = vars(`(Intercept)`, Lf_90,  logLik, AICc, delta, weight), decimals = 2) %>% 
+  fmt_number(columns = vars(`(Intercept)`, Lf_t,  logLik, AICc, delta, weight), decimals = 2) %>% 
   tab_spanner(label = "Fit information", columns = vars(df, logLik, AICc, delta, weight)) %>% 
-  tab_spanner(label = "Non-fixed parameters", columns = vars(`(Intercept)`,   Lf_90,  Sever, Sex_90, Time,  `Sever:Sex_90`, `Sever:Time`, `Sex_90:Time`, `Sever:Sex_90:Time`)) %>% 
+  tab_spanner(label = "Non-fixed parameters", columns = vars(`(Intercept)`,   Lf_t,  Sever, Sex_t, Time,  `Sever:Sex_t`, `Sever:Time`, `Sex_t:Time`, `Sever:Sex_t:Time`)) %>% 
   tab_spanner(label = "Fixed parameters", columns = vars(`(Intercept)`)) %>% 
     tab_style(style = cell_fill(color = "lightgrey"), locations = cells_body(columns = everything(),rows = delta <= 2)) %>% 
   tab_style(style = cell_fill(color = "darkgrey"), locations = cells_body( columns = everything(), rows = 4)) 
@@ -208,52 +208,52 @@ tabS3 <- head(dr, n=10) %>% gt() %>%
 Specify best model: 
 
 ```{r}
-mod91laf.bm<-lmer(LfFtot_91~Sever+Lf_90 +(1|COLONY), data = mayappleData, na.action ="na.fail", REML=FALSE)
+modt1laf.bm<-lmer(LfFtot_t1~Sever+Lf_t +(1|COLONY), data = mayappleData, na.action ="na.fail", REML=FALSE)
 ```
 
 Estimate marginal means/partial regression coefficients for the main effects:
 
 ```{r}
 #Sever:
-emmeans(mod91laf.bm, pairwise~Sever, type="response")
-#Leaf area in 1990 (see estimate for Lf_90 in summary output)
-summary(mod91laf.bm)
+emmeans(modt1laf.bm, pairwise~Sever, type="response")
+#Leaf area in year t (see estimate for Lf_t in summary output)
+summary(modt1laf.bm)
 ```
 
 
 ### 4
 
-The production of a back shoot(s) in 1991
+The production of a back shoot(s) in year $t+1$
 
-Read in data, select relevant variables, filter out records with zero leaf area in 1990. Create binary variable of back shoot status in 1991.
+Read in data, select relevant variables, filter out records with zero leaf area in year $t$. Create binary variable of back shoot status in year $t+1$.
 
 ```{r}
 # set na.strings="." to recode '.' to NA
-mayappleDatasetFull<-read_csv("mayapple_1990.csv", na=".")
+mayappleDatasetFull<-read_csv("mayapple.csv", na=".")
 
 mayappleData <- mayappleDatasetFull %>% 
-  dplyr::select(COLONY,Lf_90,Sex_90,Sever,Time,brnoB_91,LfBtot_91,Lftot_91) %>% 
-  filter(!is.na(Lf_90))
+  dplyr::select(COLONY,Lf_t,Sex_t,Sever,Time,brnoB_t1,LfBtot_t1,Lftot_t1) %>% 
+  filter(!is.na(Lf_t))
 
 mayappleData<- mayappleData %>% 
-  dplyr::mutate(backShootBranchBinary=ifelse(brnoB_91>0,1,0)) %>% 
+  dplyr::mutate(backShootBranchBinary=ifelse(brnoB_t1>0,1,0)) %>% 
   filter(!is.na(backShootBranchBinary))
 ```
 
 Specify global model, perform model selection, generate Table S4:
 
 ```{r}
-b_mod91sur<-glmmTMB(backShootBranchBinary~ Sex_90*Sever + Sex_90*Time + Lf_90 + (1|COLONY), data = mayappleData,
+b_modt1sur<-glmmTMB(backShootBranchBinary~ Sex_t*Sever + Sex_t*Time + Lf_t + (1|COLONY), data = mayappleData,
                 family="binomial")
 
-dr<-dredge(b_mod91sur)
+dr<-dredge(b_modt1sur)
 
 tabS4 <- head(dr, n=10) %>% gt() %>% cols_hide(columns=vars(`disp((Int))`)) %>% 
-  cols_label(`cond((Int))`="(Intercept)", `cond(Lf_90)`="Lf_90", `cond(Sever)`="Sever", `cond(Sex_90)`="Sex_90", `cond(Time)`="Time", `cond(Sever:Sex_90)`="Sever:Sex_90",  `cond(Sex_90:Time)`= "Sex_90:Time") %>% 
+  cols_label(`cond((Int))`="(Intercept)", `cond(Lf_t)`="Lf_t", `cond(Sever)`="Sever", `cond(Sex_t)`="Sex_t", `cond(Time)`="Time", `cond(Sever:Sex_t)`="Sever:Sex_t",  `cond(Sex_t:Time)`= "Sex_t:Time") %>% 
   fmt_number(columns = vars(`cond((Int))`, logLik, AICc, delta, weight), decimals = 2) %>% 
-  fmt_number(columns = vars(`cond(Lf_90)`), decimals = 4) %>% 
+  fmt_number(columns = vars(`cond(Lf_t)`), decimals = 4) %>% 
   tab_spanner(label = "Fit information", columns = vars(df, logLik, AICc, delta, weight)) %>% 
-  tab_spanner(label = "Non-fixed parameters", columns = vars(`cond((Int))`,  `cond(Lf_90)`, `cond(Sever)`, `cond(Sex_90)`, `cond(Time)`, `cond(Sever:Sex_90)`,  `cond(Sex_90:Time)`)) %>% 
+  tab_spanner(label = "Non-fixed parameters", columns = vars(`cond((Int))`,  `cond(Lf_t)`, `cond(Sever)`, `cond(Sex_t)`, `cond(Time)`, `cond(Sever:Sex_t)`,  `cond(Sex_t:Time)`)) %>% 
   tab_spanner(label = "Fixed parameters", columns = vars(`cond((Int))`)) %>% 
     tab_style(style = cell_fill(color = "lightgrey"), locations = cells_body(columns = everything(),rows = delta <= 2)) %>% 
   tab_style(style = cell_fill(color = "darkgrey"), locations = cells_body( columns = everything(), rows = 1)) 
@@ -263,7 +263,7 @@ tabS4 <- head(dr, n=10) %>% gt() %>% cols_hide(columns=vars(`disp((Int))`)) %>%
 Specify best model: 
 
 ```{r}
-sur_91b_bm<-glmmTMB(backShootBranchBinary~ Sever+Time + Lf_90 +(1|COLONY), data = mayappleData,
+sur_t1b_bm<-glmmTMB(backShootBranchBinary~ Sever+Time + Lf_t +(1|COLONY), data = mayappleData,
                 family="binomial")
 ```
 
@@ -271,30 +271,30 @@ Estimate marginal means/partial regression coefficients for the main effects:
 
 ```{r}
 #Sever
-emmeans(sur_91b_bm, pairwise~Sever, type="response" )
+emmeans(sur_t1b_bm, pairwise~Sever, type="response" )
 #Time
-emmeans(sur_91b_bm, pairwise~Time, type="response" )
-#Leaf area in 1990 (see estimate for Lf_90 in summary output)
-summary(sur_91b_bm)
+emmeans(sur_t1b_bm, pairwise~Time, type="response" )
+#Leaf area in year t (see estimate for Lf_t in summary output)
+summary(sur_t1b_bm)
 ```
 
 ### 5
 
-The total leaf area of the back system in 1991 (for systems with shoots in 1991)
+The total leaf area of the back system in year $t+1$ (for systems with shoots in year $t+1$)
 
-Read in data, select relevant variables. Convert response to numeric, remove NA values and select systems with non-zero back leaf area in 1991.
+Read in data, select relevant variables. Convert response to numeric, remove NA values and select systems with non-zero back leaf area in year $t+1$.
 ```{r}
-mayappleDatasetFull<-read_csv("mayapple_1990.csv", na=".")
+mayappleDatasetFull<-read_csv("mayapple.csv", na=".")
 
 mayappleData <- mayappleDatasetFull %>% 
-  dplyr::select(COLONY,Lf_90,Sex_90,Sever,Time,brnoB_91,LfBtot_91,Lftot_91) %>% 
-  filter(!is.na(Lf_90))
+  dplyr::select(COLONY,Lf_t,Sex_t,Sever,Time,brnoB_t1,LfBtot_t1,Lftot_t1) %>% 
+  filter(!is.na(Lf_t))
 
-mayappleData$LfBtot_91<-as.numeric(mayappleData$LfBtot_91)
+mayappleData$LfBtot_t1<-as.numeric(mayappleData$LfBtot_t1)
 
 mayappleData <- mayappleData %>% 
-  filter(!is.na(LfBtot_91)) %>% 
-  filter(LfBtot_91>0)
+  filter(!is.na(LfBtot_t1)) %>% 
+  filter(LfBtot_t1>0)
 
 ```
 
@@ -302,15 +302,15 @@ Specify global model, perform model selection, generate Table S5:
 
 ```{r, warning=FALSE, message=FALSE}
 
-b_mod91la.0l<-lmer(LfBtot_91~Sex_90*Time+Sever +Lf_90+(1|COLONY), data = mayappleData, na.action ="na.fail", REML=FALSE)
+b_modt1la.0l<-lmer(LfBtot_t1~Sex_t*Time+Sever +Lf_t+(1|COLONY), data = mayappleData, na.action ="na.fail", REML=FALSE)
 
-dr<-dredge(b_mod91la.0l)
+dr<-dredge(b_modt1la.0l)
 
 tabS5 <- head(dr, n=10) %>% gt() %>%
-  fmt_number(columns = vars(`(Intercept)`, Lf_90, logLik, AICc, delta, weight), decimals = 2) %>% 
+  fmt_number(columns = vars(`(Intercept)`, Lf_t, logLik, AICc, delta, weight), decimals = 2) %>% 
   tab_spanner(label = "Fit information", columns = vars(df, logLik, AICc, delta, weight)) %>% 
-  tab_spanner(label = "Non-fixed parameters", columns = vars(`(Intercept)`,   Lf_90,  Sever, Sex_90, Time,    `Sex_90:Time` )) %>% 
-  tab_spanner(label = "Fixed parameters", columns = vars(`(Intercept)`,Lf_90)) %>% 
+  tab_spanner(label = "Non-fixed parameters", columns = vars(`(Intercept)`,   Lf_t,  Sever, Sex_t, Time,    `Sex_t:Time` )) %>% 
+  tab_spanner(label = "Fixed parameters", columns = vars(`(Intercept)`,Lf_t)) %>% 
     tab_style(style = cell_fill(color = "lightgrey"), locations = cells_body(columns = everything(),rows = delta <= 2)) %>% 
   tab_style(style = cell_fill(color = "darkgrey"), locations = cells_body( columns = everything(), rows = 1)) 
 
@@ -319,52 +319,52 @@ tabS5 <- head(dr, n=10) %>% gt() %>%
 Specify best model:
 
 ```{r}
-b_mod91la.bm<-lmer(LfBtot_91~Sex_90+Sever+Time +Lf_90+(1|COLONY), data = mayappleData, na.action ="na.fail", REML=FALSE)
+b_modt1la.bm<-lmer(LfBtot_t1~Sex_t+Sever+Time +Lf_t+(1|COLONY), data = mayappleData, na.action ="na.fail", REML=FALSE)
 ```
 
 Estimate marginal means/partial regression coefficients for the main effects:
 
 ```{r}
-#Sex_90:
-emmeans(b_mod91la.bm, pairwise~Sex_90, type="response")
+#Sex_t:
+emmeans(b_modt1la.bm, pairwise~Sex_t, type="response")
 #Time:
-emmeans(b_mod91la.bm, pairwise~Time, type="response")
+emmeans(b_modt1la.bm, pairwise~Time, type="response")
 #Sever:
-emmeans(b_mod91la.bm, pairwise~Sever, type="response")
-#Leaf area in 1990 (see estimate for Lf_90 in summary output)
-summary(b_mod91la.bm)
+emmeans(b_modt1la.bm, pairwise~Sever, type="response")
+#Leaf area in year t (see estimate for Lf_t in summary output)
+summary(b_modt1la.bm)
 ```
 
 ### 6
 
-The total leaf area of the front system in 1992 (for systems with shoots in 1992). This analysis uses all systems that have a non-NA value for total leaf area of the front and back in 1991 and in 1992, excluding those systems for which 1990 leaf area was NA. *Furthermore*, it restricts the analysis to those systems that have a non-zero leaf area in 1992.
+The total leaf area of the front system in year $t+2$ (for systems with shoots in year $t+2$). This analysis uses all systems that have a non-NA value for total leaf area of the front and back in year $t+1$ and in year $t+2$, excluding those systems for which year $t$ leaf area was NA. *Furthermore*, it restricts the analysis to those systems that have a non-zero leaf area in year $t+2$
 
-Read in data, select relevant variables. Filter out the records without leaf area measurements in 1990 and/or 1991 and/or 1992 (front).
+Read in data, select relevant variables. Filter out the records without leaf area measurements in year $t$ and/or year $t+1$ and/or year $t+2$ (front).
 
 ```{r}
 # set na.strings="." to recode '.' to NA
-mayappleDatasetFull<-read_csv("mayapple_1990.csv", na=".")
+mayappleDatasetFull<-read_csv("mayapple.csv", na=".")
 
 mayappleData <- mayappleDatasetFull %>% 
-  dplyr::select(COLONY,Lf_90,Sex_90,Sever,Time,LftotF_92, Lftot_91, LfBtot_91, LfFtot_91) %>% 
-  mutate(LftotF_92=parse_double(LftotF_92), Lftot_91=parse_double(Lftot_91), LfBtot_91=parse_double(LfBtot_91), LfFtot_91=parse_double(LfFtot_91) ) %>% 
-  filter(!is.na(Lf_90)) %>% 
-  filter(!is.na(Lftot_91)) %>% 
-  filter(!is.na(LftotF_92)) %>% 
-  filter(LftotF_92>0)
+  dplyr::select(COLONY,Lf_t,Sex_t,Sever,Time,LftotF_t2, Lftot_t1, LfBtot_t1, LfFtot_t1) %>% 
+  mutate(LftotF_t2=parse_double(LftotF_t2), Lftot_t1=parse_double(Lftot_t1), LfBtot_t1=parse_double(LfBtot_t1), LfFtot_t1=parse_double(LfFtot_t1) ) %>% 
+  filter(!is.na(Lf_t)) %>% 
+  filter(!is.na(Lftot_t1)) %>% 
+  filter(!is.na(LftotF_t2)) %>% 
+  filter(LftotF_t2>0)
 ```
 
 Specify global model, perform model selection, generate Table S6:
 
 ```{r, warning=FALSE, message=FALSE}
-d_mod92la.0l<-lmer(LftotF_92~Sex_90*Sever*Time +LfFtot_91+Lf_90+(1|COLONY), data = mayappleData, na.action ="na.fail", REML=FALSE)
+d_modt2la.0l<-lmer(LftotF_t2~Sex_t*Sever*Time +LfFtot_t1+Lf_t+(1|COLONY), data = mayappleData, na.action ="na.fail", REML=FALSE)
 
-dr<-dredge(d_mod92la.0l)
+dr<-dredge(d_modt2la.0l)
 
 tabS6 <- head(dr, n=10) %>% gt() %>%
-  fmt_number(columns = vars(`(Intercept)`, Lf_90, LfFtot_91, logLik, AICc, delta, weight), decimals = 2) %>% 
+  fmt_number(columns = vars(`(Intercept)`, Lf_t, LfFtot_t1, logLik, AICc, delta, weight), decimals = 2) %>% 
   tab_spanner(label = "Fit information", columns = vars(df, logLik, AICc, delta, weight)) %>% 
-  tab_spanner(label = "Non-fixed parameters", columns = vars(`(Intercept)`,   Lf_90, LfFtot_91, Sever, Sex_90, Time,  `Sever:Sex_90`, `Sever:Time`, `Sex_90:Time`, `Sever:Sex_90:Time`)) %>% 
+  tab_spanner(label = "Non-fixed parameters", columns = vars(`(Intercept)`,   Lf_t, LfFtot_t1, Sever, Sex_t, Time,  `Sever:Sex_t`, `Sever:Time`, `Sex_t:Time`, `Sever:Sex_t:Time`)) %>% 
   tab_spanner(label = "Fixed parameters", columns = vars(`(Intercept)`)) %>% 
     tab_style(style = cell_fill(color = "lightgrey"), locations = cells_body(columns = everything(),rows = delta <= 2)) %>% 
   tab_style(style = cell_fill(color = "darkgrey"), locations = cells_body( columns = everything(), rows = 1)) 
@@ -374,47 +374,47 @@ tabS6 <- head(dr, n=10) %>% gt() %>%
 Specify best model:
 
 ```{r}
-d_mod92la.bm<-lmer(LftotF_92~+LfFtot_91+Lf_90+(1|COLONY), data = mayappleData, na.action ="na.fail")
+d_modt2la.bm<-lmer(LftotF_t2~+LfFtot_t1+Lf_t+(1|COLONY), data = mayappleData, na.action ="na.fail")
 ```
 
 Estimate partial regression coefficients for the main effects:
 
 ```{r}
-#Partial regression coefficients for Lf_90 and LfFtot_91 can be found in the model summary table:
-summary(d_mod92la.bm)
+#Partial regression coefficients for Lf_t and LfFtot_t1 can be found in the model summary table:
+summary(d_modt2la.bm)
 ```
 
 
 ### 7
 
-The total leaf area of the back system in 1992 (for systems with shoots in 1992). This analysis uses all systems that have a non-NA value for total leaf area of the front and back in 1991 and in 1992, excluding those systems for which 1990 leaf area was NA. *Furthermore*, this analysis excludes any systems with a zero leaf area in 1992.
+The total leaf area of the back system in year $t+2$ (for systems with shoots in year $t+2$). This analysis uses all systems that have a non-NA value for total leaf area of the front and back in year $t+1$ and in year $t+2$, excluding those systems for which year $t$ leaf area was NA. *Furthermore*, this analysis excludes any systems with a zero leaf area in year $t+2$.
 
-Read in data, select relevant variables. Filter out the records without leaf area measurements in 1990 and/or 1991 and/or 1992 (back).
+Read in data, select relevant variables. Filter out the records without leaf area measurements in year $t$ and/or year $t+1$ and/or year $t+2$ (back).
 
 ```{r}
 # set na.strings="." to recode '.' to NA
-mayappleDatasetFull<-read_csv("mayapple_1990.csv", na=".")
+mayappleDatasetFull<-read_csv("mayapple.csv", na=".")
 
 mayappleData <- mayappleDatasetFull %>% 
-  dplyr::select(COLONY,Lf_90,Sex_90,Sever,Time,LftotB_92, Lftot_91, LfBtot_91, LfFtot_91) %>% 
-  mutate(LftotB_92=parse_double(LftotB_92), Lftot_91=parse_double(Lftot_91), LfBtot_91=parse_double(LfBtot_91), LfFtot_91=parse_double(LfFtot_91) ) %>% 
-  filter(!is.na(Lf_90)) %>% 
-  filter(!is.na(Lftot_91)) %>% 
-  filter(!is.na(LftotB_92)) %>% 
-  filter(LftotB_92>0)
+  dplyr::select(COLONY,Lf_t,Sex_t,Sever,Time,LftotB_t2, Lftot_t1, LfBtot_t1, LfFtot_t1) %>% 
+  mutate(LftotB_t2=parse_double(LftotB_t2), Lftot_t1=parse_double(Lftot_t1), LfBtot_t1=parse_double(LfBtot_t1), LfFtot_t1=parse_double(LfFtot_t1) ) %>% 
+  filter(!is.na(Lf_t)) %>% 
+  filter(!is.na(Lftot_t1)) %>% 
+  filter(!is.na(LftotB_t2)) %>% 
+  filter(LftotB_t2>0)
 ```
 
 Specify global model, perform model selection, generate Table S7:
 
 ```{r, warning=FALSE, message=FALSE}
-d_mod92la.0l<-lmer(LftotB_92~Sex_90*Sever*Time +LfBtot_91+Lf_90+(1|COLONY), data = mayappleData, na.action ="na.fail",REML=FALSE)
+d_modt2la.0l<-lmer(LftotB_t2~Sex_t*Sever*Time +LfBtot_t1+Lf_t+(1|COLONY), data = mayappleData, na.action ="na.fail",REML=FALSE)
 
-dr<-dredge(d_mod92la.0l)
+dr<-dredge(d_modt2la.0l)
 
 tabS7 <- head(dr, n=10) %>% gt() %>%
-  fmt_number(columns = vars(`(Intercept)`, Lf_90, LfBtot_91, logLik, AICc, delta, weight), decimals = 2) %>% 
+  fmt_number(columns = vars(`(Intercept)`, Lf_t, LfBtot_t1, logLik, AICc, delta, weight), decimals = 2) %>% 
   tab_spanner(label = "Fit information", columns = vars(df, logLik, AICc, delta, weight)) %>% 
-  tab_spanner(label = "Non-fixed parameters", columns = vars(`(Intercept)`,   Lf_90, LfBtot_91, Sever, Sex_90, Time,  `Sever:Sex_90`, `Sever:Time`, `Sex_90:Time`, `Sever:Sex_90:Time`)) %>% 
+  tab_spanner(label = "Non-fixed parameters", columns = vars(`(Intercept)`,   Lf_t, LfBtot_t1, Sever, Sex_t, Time,  `Sever:Sex_t`, `Sever:Time`, `Sex_t:Time`, `Sever:Sex_t:Time`)) %>% 
   tab_spanner(label = "Fixed parameter", columns = vars(`(Intercept)`)) %>% 
     tab_style(style = cell_fill(color = "lightgrey"), locations = cells_body(columns = everything(),rows = delta <= 2)) %>% 
   tab_style(style = cell_fill(color = "darkgrey"), locations = cells_body( columns = everything(), rows = 1)) 
@@ -425,16 +425,16 @@ tabS7 <- head(dr, n=10) %>% gt() %>%
 Specify best model:
 
 ```{r}
-d_mod92la.bm<-lmer(LftotB_92~Sever +Lf_90+LfBtot_91+(1|COLONY), data = mayappleData, na.action ="na.fail", REML=FALSE)
+d_modt2la.bm<-lmer(LftotB_t2~Sever +Lf_t+LfBtot_t1+(1|COLONY), data = mayappleData, na.action ="na.fail", REML=FALSE)
 ```
 
 Estimate marginal means/partial regression coefficients for the main effects:
 
 ```{r}
 #Sever:
-emmeans(d_mod92la.bm, pairwise~Sever, type="response")
-#Partial regression coefficient for Lf_90 and LfBtot_91 can be found in the model summary table:
-summary(d_mod92la.bm)
+emmeans(d_modt2la.bm, pairwise~Sever, type="response")
+#Partial regression coefficient for Lf_t and LfBtot_t1 can be found in the model summary table:
+summary(d_modt2la.bm)
 ```
 
 
