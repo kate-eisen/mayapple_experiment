@@ -9,7 +9,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introduction
 
-This document contains the code used to run the analyses for Q4 in the manuscript, including code used to generate the values in Tables S8-S13.
+This document contains the code used to run the analyses for Q3 in the manuscript, including code used to generate the values in Tables S8-S13.
 
 Packages:
 

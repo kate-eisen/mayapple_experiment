@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 This document contains:
 
-- Code used to run the analyses that address Q1, Q2, and Q3 in the manuscript
+- Code used to run the analyses that address Q1 and Q2 in the manuscript
 - Code used to generate supplemental tables S1-S7
 
 Packages:
@@ -33,7 +33,7 @@ library(webshot)
 
 Model selection was performed on seven response variables that were measured between year $t$ and $t+2$ 
 
-*Q1: Do the position and timing of severing affect shoot performance in the year of severing and in the following year?*
+*Q1: Do sexual status and the position and timing of severing affect front and/or back shoot production and performance in the year of severing and in the following years?*
 
 To address this question, we performed model selection on five response variables: 
 1. leaf area in year $t$ (the year of severing)
@@ -42,11 +42,7 @@ To address this question, we performed model selection on five response variable
 4. the production of a back shoot(s) in year $t+1$ 
 5. the total leaf area of the back system in year $t+1$ (for systems with shoots in year $t+1$) 
 
-*Q2: Do the position and timing of severing affect the ability of the back system to recover from damage by producing a back shoot?*
-
-To address this question, we used the model selection results from the analysis of back shoot production in year $t+1$. (See #4 below)
-
-*Q3: In the years following the experimental severing, are there persistent effects of severing on plant performance or are these mediated through treatment effects on past years’ performance?*
+*Q2: In the two years following the experimental severing, is plant performance still affected by the location and time of severing or is the previous year’s shoot size a better predictor of performance?*
 
 To address this question, we used the model selection results from the four year $t+1$ response variables (see #2-#5 below) and two response variables that were measured in year $t+2$: total leaf area of the front portion of the system in year $t+2$ (#6), and total leaf area of the back portion of the system in year $t+2$ (#7). 
 
