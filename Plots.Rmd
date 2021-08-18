@@ -9,7 +9,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introduction 
 
-This document contains the code needed to recreate the plots in the manuscript (Figure 1, Figure 2, Figure S1). *Note*: All figure aesthetics were finalized in Adobe Illustrator.
+This document contains the code needed to recreate the data plots in the manuscript (Figure 2, Figure 3, Figure S1). *Note*: All figure aesthetics were finalized in Adobe Illustrator.
 
 ```{r}
 library(tidyverse)
@@ -21,7 +21,7 @@ library(emmeans)
 library(glmmTMB)
 ```
 
-## Figure 1
+## Figure 2
 
 *Note*: the models used to generate the estimated marginal means were the best models returned by our model selection procedure. See `Model selection analyses.Rmd`.
 
@@ -172,7 +172,7 @@ ggdraw() +
 ```
 
 
-## Figure 2
+## Figure 3
 
 ```{r}
 mayappleDatasetFull<-read_csv("mayapple.csv", na=".")
@@ -199,14 +199,14 @@ mutate(Status = case_when(LfFtot_t1!=0 & LfBtot_t1!=0 ~"Two",
   mutate(Lf_t1s=ifelse(Status=="Two", Lftot_t1/2, Lftot_t1)) 
 
 s_t1mod1<-lmer(Lftot_t1~Status*Sever+(1|COLONY), data = mayappleData_t1)
-a<-emmip(s_t1mod1, Sever~Status  ,CIs = TRUE)+ ylab("Total leaf area")+ 
+a<-emmip(s_t1mod1, Sever~Status  ,CIs = TRUE,linearg = list(linetype = NA))+ ylab("Total leaf area")+ 
   theme_bw()+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+xlab("")+theme(legend.position = "none")+theme(panel.border = element_blank(), axis.line = element_line())
 
 counts<-mayappleData_t1 %>% group_by(Status, Sever) %>% 
   count(N=length(Sever))
 
 s_t1mod2<-lmer(Lf_t1s~Status*Sever+(1|COLONY), data = mayappleData_t1)
-b<-emmip(s_t1mod2, Sever~Status  ,CIs = TRUE)+ ylab("Average leaf area per system")+ 
+b<-emmip(s_t1mod2, Sever~Status  ,CIs = TRUE, linearg = list(linetype = NA))+ ylab("Average leaf area per system")+ 
   theme_bw()+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+scale_y_continuous(limits=c(-250, 1500))+ geom_text(data=counts, aes(x=Status, y=N, label=N, color=Sever))
 
 
@@ -215,7 +215,7 @@ ggdraw(b) +
   draw_plot(a, .35, .47, .6, .6, scale=0.75)
 ```
 
-## Figure S1
+## Figure S3
 
 ```{r}
 
@@ -339,14 +339,14 @@ mayappleData_t2 <- mayappleData_t1 %>%
 
 
 s_t2mod1<-lmer(Lftot_t2~Status*Sever+(1|COLONY), data = mayappleData_t2)
-a<-emmip(s_t2mod1, Sever~Status  ,CIs = TRUE)+ ylab("Total leaf area")+ 
+a<-emmip(s_t2mod1, Sever~Status  ,CIs = TRUE,linearg = list(linetype = NA))+ ylab("Total leaf area")+ 
   theme_bw()+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+xlab("")+theme(legend.position = "none")+theme(panel.border = element_blank(), axis.line = element_line())
 
 counts<-mayappleData_t2 %>% group_by(Status, Sever) %>% 
   count(N=length(Sever))
 
 s_t2mod2<-lmer(Lf_t2s~Status*Sever+(1|COLONY), data = mayappleData_t2)
-b<-emmip(s_t2mod2, Sever~Status  ,CIs = TRUE)+ ylab("Average leaf area per system")+ 
+b<-emmip(s_t2mod2, Sever~Status  ,CIs = TRUE,linearg = list(linetype = NA))+ ylab("Average leaf area per system")+ 
   theme_bw()+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+scale_y_continuous(limits=c(-250, 1500))+ geom_text(data=counts, aes(x=Status, y=N, label=N, color=Sever))
 
 ggdraw(b) +
@@ -354,4 +354,24 @@ ggdraw(b) +
 
 ```
 
+## Figure S1
+
+
+```{r load year_t, warning=FALSE, message=FALSE}
+may<-read_csv("mayapple.csv",na=".")
+
+may$Lf_t<-as.numeric(as.character(may$Lf_t))
+
+may<-may %>% 
+  filter(!is.na(Lf_t))
+
+model.bm<-lmer(Lf_t~Sex_t*Time+Sever*Time+(1|COLONY), data=may, na.action = "na.fail", REML=FALSE)
+```
+
+```{r}
+#Drawing the figure
+
+sex_sever <- emmip(model.bm,  Time~Sex_t,CIs = TRUE, linearg = list(linetype = NA))+xlab("")+mdthemes::md_theme_classic() +ggtitle("**Sex  x severing time**") + xlab("Sexual status") + ylab("Leaf area ( cm^2 )") 
+                                                                                            
+```
 
