@@ -44,7 +44,9 @@ Drawing panels:
 ```{r, warning=FALSE, message=FALSE}
 
 Sever_1 <- emmip(model.bm,  ~ Sever ,CIs = TRUE)+xlab("")+mdthemes::md_theme_classic() +ggtitle("**Sever**  
-                                                                                                         *Leaf area in year t*")
+                                                                                                         *Leaf area in year t*") +
+  ylab("Leaf area (cm^2)")+ xlab("Levels of Sever")
+
 Time_1 <- emmip(model.bm,  ~ Time ,CIs = TRUE)+xlab("")+ylab("")+mdthemes::md_theme_classic() +ggtitle("**Time**") 
 
 Int_1 <- emmip(model.bm, Time  ~ Sever  ,CIs = TRUE)+xlab("")+ylab("")+mdthemes::md_theme_classic()+ggtitle("**Sever x Time**")
@@ -77,7 +79,7 @@ sur_t1f_bm<-glmmTMB(deadAliveBinary~ Sever+Time +  (1|COLONY), data = mayappleDa
 Drawing panels:
 
 ```{r}
-Sever_2 <- emmip(sur_t1f_bm,   ~ Sever  , type="response",CIs = TRUE)+xlab("")+ylab("Predicted probability")+mdthemes::md_theme_classic()+ggtitle("*Front survival in year t+1*")
+Sever_2 <- emmip(sur_t1f_bm,   ~ Sever  , type="response",CIs = TRUE)+xlab("")+ylab("Probability of shoot production")+mdthemes::md_theme_classic()+ggtitle("*Front survival in year t+1*")
 
 Time_2 <- emmip(sur_t1f_bm,   ~ Time  ,type="response",CIs = TRUE)+xlab("")+ylab("")+mdthemes::md_theme_classic()
 ```
@@ -100,7 +102,7 @@ mod_t1laf.bm<-lmer(LfFtot_t1~Sever+Lf_t +(1|COLONY), data = mayappleData, na.act
 Drawing panel:
 
 ```{r}
-Sever_3 <- emmip(mod_t1laf.bm,   ~ Sever  ,CIs = TRUE)+xlab("")+mdthemes::md_theme_classic()+ggtitle("*Front leaf area in year t+1*")
+Sever_3 <- emmip(mod_t1laf.bm,   ~ Sever  ,CIs = TRUE)+xlab("")+mdthemes::md_theme_classic()+ggtitle("*Front leaf area in year t+1*") + ylab("Leaf area (cm^2)")
 
 ```
 
@@ -127,7 +129,7 @@ sur_t1b_bm<-glmmTMB(backShootBranchBinary~ Sever+Time + Lf_t +(1|COLONY), data =
 Drawing panels:
 
 ```{r}
-Sever_4 <- emmip(sur_t1b_bm,   ~ Sever  ,type="response",CIs = TRUE )+xlab("")+ylab("Predicted probability")+mdthemes::md_theme_classic()+ggtitle("*Back shoot production in year t+1*")
+Sever_4 <- emmip(sur_t1b_bm,   ~ Sever  ,type="response",CIs = TRUE )+xlab("")+ylab("Probability of shoot production")+mdthemes::md_theme_classic()+ggtitle("*Back shoot production in year t+1*")
 
 Time_4 <- emmip(sur_t1b_bm,   ~ Time  ,type="response",CIs = TRUE )+xlab("")+ylab("")+mdthemes::md_theme_classic()
 ```
@@ -150,8 +152,8 @@ b_mod_t1la.bm<-lmer(LfBtot_t1~Sex_t+Sever+Time +Lf_t+(1|COLONY), data = mayapple
 Drawing panels:
 
 ```{r}
-Sever_5 <- emmip(b_mod_t1la.bm,  ~ Sever  ,CIs = TRUE )+mdthemes::md_theme_classic()+ggtitle("*Back leaf area in year t+1*")
-Time_5 <- emmip(b_mod_t1la.bm,  ~ Time  ,CIs = TRUE )+ylab("")+mdthemes::md_theme_classic()
+Sever_5 <- emmip(b_mod_t1la.bm,  ~ Sever  ,CIs = TRUE )+mdthemes::md_theme_classic()+ggtitle("*Back leaf area in year t+1*") + ylab("Leaf area (cm^2)") + xlab("Levels of Sever")
+Time_5 <- emmip(b_mod_t1la.bm,  ~ Time  ,CIs = TRUE )+ylab("")+mdthemes::md_theme_classic() + xlab("Levels of Time")
 ```
 
 
@@ -199,14 +201,14 @@ mutate(Status = case_when(LfFtot_t1!=0 & LfBtot_t1!=0 ~"Two",
   mutate(Lf_t1s=ifelse(Status=="Two", Lftot_t1/2, Lftot_t1)) 
 
 s_t1mod1<-lmer(Lftot_t1~Status*Sever+(1|COLONY), data = mayappleData_t1)
-a<-emmip(s_t1mod1, Sever~Status  ,CIs = TRUE,linearg = list(linetype = NA))+ ylab("Total leaf area")+ 
+a<-emmip(s_t1mod1, Sever~Status  ,CIs = TRUE,linearg = list(linetype = NA))+ ylab("Total leaf area (cm^2)")+ 
   theme_bw()+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+xlab("")+theme(legend.position = "none")+theme(panel.border = element_blank(), axis.line = element_line())
 
 counts<-mayappleData_t1 %>% group_by(Status, Sever) %>% 
   count(N=length(Sever))
 
 s_t1mod2<-lmer(Lf_t1s~Status*Sever+(1|COLONY), data = mayappleData_t1)
-b<-emmip(s_t1mod2, Sever~Status  ,CIs = TRUE, linearg = list(linetype = NA))+ ylab("Average leaf area per system")+ 
+b<-emmip(s_t1mod2, Sever~Status  ,CIs = TRUE, linearg = list(linetype = NA))+ ylab("Average leaf area per system (cm^2)")+ xlab("Number of descendant rhizome systems") +
   theme_bw()+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+scale_y_continuous(limits=c(-250, 1500))+ geom_text(data=counts, aes(x=Status, y=N, label=N, color=Sever))
 
 
@@ -339,14 +341,14 @@ mayappleData_t2 <- mayappleData_t1 %>%
 
 
 s_t2mod1<-lmer(Lftot_t2~Status*Sever+(1|COLONY), data = mayappleData_t2)
-a<-emmip(s_t2mod1, Sever~Status  ,CIs = TRUE,linearg = list(linetype = NA))+ ylab("Total leaf area")+ 
+a<-emmip(s_t2mod1, Sever~Status  ,CIs = TRUE,linearg = list(linetype = NA))+ ylab("Total leaf area (cm^2)")+ 
   theme_bw()+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+xlab("")+theme(legend.position = "none")+theme(panel.border = element_blank(), axis.line = element_line())
 
 counts<-mayappleData_t2 %>% group_by(Status, Sever) %>% 
   count(N=length(Sever))
 
 s_t2mod2<-lmer(Lf_t2s~Status*Sever+(1|COLONY), data = mayappleData_t2)
-b<-emmip(s_t2mod2, Sever~Status  ,CIs = TRUE,linearg = list(linetype = NA))+ ylab("Average leaf area per system")+ 
+b<-emmip(s_t2mod2, Sever~Status  ,CIs = TRUE,linearg = list(linetype = NA))+ ylab("Average leaf area per system (cm^2)")+ xlab("Number of descendant rhizome systems") + 
   theme_bw()+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+scale_y_continuous(limits=c(-250, 1500))+ geom_text(data=counts, aes(x=Status, y=N, label=N, color=Sever))
 
 ggdraw(b) +
