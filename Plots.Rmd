@@ -19,6 +19,7 @@ library(ggpubr)
 library(lme4)
 library(emmeans)
 library(glmmTMB)
+library(gridExtra)
 ```
 
 ## Figure 2
@@ -201,20 +202,21 @@ mutate(Status = case_when(LfFtot_t1!=0 & LfBtot_t1!=0 ~"Two",
   mutate(Lf_t1s=ifelse(Status=="Two", Lftot_t1/2, Lftot_t1)) 
 
 s_t1mod1<-lmer(Lftot_t1~Status*Sever+(1|COLONY), data = mayappleData_t1)
-a<-emmip(s_t1mod1, Sever~Status  ,CIs = TRUE,linearg = list(linetype = NA))+ ylab("Total leaf area (cm^2)")+ 
+a<-emmip(s_t1mod1, Sever~Status  ,CIs = TRUE,linearg = list(linetype = NA))+mdthemes::md_theme_classic()+ ylab("Total leaf area (cm^2)")+ 
   theme_bw()+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+xlab("")+theme(legend.position = "none")+theme(panel.border = element_blank(), axis.line = element_line())
 
 counts<-mayappleData_t1 %>% group_by(Status, Sever) %>% 
   count(N=length(Sever))
 
 s_t1mod2<-lmer(Lf_t1s~Status*Sever+(1|COLONY), data = mayappleData_t1)
-b<-emmip(s_t1mod2, Sever~Status  ,CIs = TRUE, linearg = list(linetype = NA))+ ylab("Average leaf area per system (cm^2)")+ xlab("Number of descendant rhizome systems") +
-  theme_bw()+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+scale_y_continuous(limits=c(-250, 1500))+ geom_text(data=counts, aes(x=Status, y=N, label=N, color=Sever))
+b<-emmip(s_t1mod2, Sever~Status  ,CIs = TRUE, linearg = list(linetype = NA))+mdthemes::md_theme_classic()+ ylab("Average leaf area per system (cm^2)")+ xlab("Number of descendant rhizome systems") +
+  theme_bw()+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+scale_y_continuous(limits=c(-250, 1500))+ geom_text(data=counts, aes(x=Status, y=N, label=N, color=Sever))+theme(panel.border = element_blank(), axis.line = element_line())
 
+grid.arrange(a, b, nrow=1)
 
-
-ggdraw(b) +
-  draw_plot(a, .35, .47, .6, .6, scale=0.75)
+ggdraw() +
+  draw_plot(a, x=0, y=0, width=0.5, height=1)+
+  draw_plot(Sever_2, x=0.5, y=0,width=0.5, height=1)
 ```
 
 ## Figure S3
@@ -287,9 +289,6 @@ d <- ggplot(data=mayappleData, aes(x=Lf_t, y=LftotF_t2, color=Sex_t)) +
   geom_point() + geom_smooth(method = "lm", se = FALSE)+theme_classic()+
   ylab("Front leaf area in year t+2") +xlab("Leaf area in year t")+ scale_color_discrete(name="Sexual status in year t")
 
-e <- ggplot(data=mayappleData, aes(x=LfFtot_t1, y=LftotF_t2, color=Sex_t)) +
-  geom_point() + geom_smooth(method = "lm", se = FALSE)+theme_classic()+
-  ylab("Front leaf area in year t+2") +xlab("Front leaf area in year t+1")+ scale_color_discrete(name="Sexual status in year t")
 
 
 # year t+2 back leaf area
@@ -303,15 +302,13 @@ mayappleData <- mayappleDatasetFull %>%
   filter(!is.na(Lftot_t1)) %>% 
   filter(!is.na(LftotB_t2))
 
-f <- ggplot(data=mayappleData, aes(x=Lf_t, y=LftotB_t2, color=Sex_t)) +
+e <- ggplot(data=mayappleData, aes(x=Lf_t, y=LftotB_t2, color=Sex_t)) +
   geom_point() + geom_smooth(method = "lm", se = FALSE)+theme_classic()+
   ylab("Back leaf area in year t+2") +xlab("Leaf area in year t")+ scale_color_discrete(name="Sexual status in year t")
 
-g <- ggplot(data=mayappleData, aes(x=LfBtot_t1, y=LftotB_t2, color=Sex_t)) +
-  geom_point() + geom_smooth(method = "lm", se = FALSE)+theme_classic()+
-  ylab("Back leaf area in year t+2") +xlab("Back leaf area in year t+1")+ scale_color_discrete(name="Sexual status in year t")
 
-ggarrange(a,b,c,d,e,f,g, nrow=4, ncol=2, common.legend = TRUE, legend = "bottom", labels="AUTO", label.x=0.15, hjust=0)
+
+ggarrange(a,b,c,d,e, nrow=3, ncol=2, common.legend = TRUE, legend = "bottom", labels="AUTO", label.x=0.15, hjust=0)
 
 ggdraw() +
   draw_plot(a, x=0, y=0.75, width=0.5, height=0.25)+

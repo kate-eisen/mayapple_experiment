@@ -306,7 +306,7 @@ tabS5 <- head(dr, n=10) %>% gt() %>%
   fmt_number(columns = vars(`(Intercept)`, Lf_t, logLik, AICc, delta, weight), decimals = 2) %>% 
   tab_spanner(label = "Fit information", columns = vars(df, logLik, AICc, delta, weight)) %>% 
   tab_spanner(label = "Non-fixed parameters", columns = vars(`(Intercept)`,   Lf_t,  Sever, Sex_t, Time,    `Sex_t:Time` )) %>% 
-  tab_spanner(label = "Fixed parameters", columns = vars(`(Intercept)`,Lf_t)) %>% 
+  tab_spanner(label = "Fixed parameters", columns = vars(`(Intercept)`)) %>% 
     tab_style(style = cell_fill(color = "lightgrey"), locations = cells_body(columns = everything(),rows = delta <= 2)) %>% 
   tab_style(style = cell_fill(color = "darkgrey"), locations = cells_body( columns = everything(), rows = 1)) 
 
