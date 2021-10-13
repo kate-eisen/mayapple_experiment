@@ -203,20 +203,17 @@ mutate(Status = case_when(LfFtot_t1!=0 & LfBtot_t1!=0 ~"Two",
 
 s_t1mod1<-lmer(Lftot_t1~Status*Sever+(1|COLONY), data = mayappleData_t1)
 a<-emmip(s_t1mod1, Sever~Status  ,CIs = TRUE,linearg = list(linetype = NA))+mdthemes::md_theme_classic()+ ylab("Total leaf area (cm^2)")+ 
-  theme_bw()+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+xlab("")+theme(legend.position = "none")+theme(panel.border = element_blank(), axis.line = element_line())
+  theme_bw()+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+xlab("")+theme(panel.border = element_blank(), axis.line = element_line())+scale_y_continuous(limits=c(-300, 1000))
 
 counts<-mayappleData_t1 %>% group_by(Status, Sever) %>% 
   count(N=length(Sever))
 
 s_t1mod2<-lmer(Lf_t1s~Status*Sever+(1|COLONY), data = mayappleData_t1)
 b<-emmip(s_t1mod2, Sever~Status  ,CIs = TRUE, linearg = list(linetype = NA))+mdthemes::md_theme_classic()+ ylab("Average leaf area per system (cm^2)")+ xlab("Number of descendant rhizome systems") +
-  theme_bw()+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+scale_y_continuous(limits=c(-250, 1500))+ geom_text(data=counts, aes(x=Status, y=N, label=N, color=Sever))+theme(panel.border = element_blank(), axis.line = element_line())
+  theme_bw()+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+scale_y_continuous(limits=c(-300, 1000))+ geom_text(data=counts, aes(x=Status, y=N, label=N, color=Sever))+theme(panel.border = element_blank(), axis.line = element_line())+theme(legend.position = "none")
 
-grid.arrange(a, b, nrow=1)
+grid.arrange(b, a, nrow=1)
 
-ggdraw() +
-  draw_plot(a, x=0, y=0, width=0.5, height=1)+
-  draw_plot(Sever_2, x=0.5, y=0,width=0.5, height=1)
 ```
 
 ## Figure S3
@@ -339,17 +336,15 @@ mayappleData_t2 <- mayappleData_t1 %>%
 
 s_t2mod1<-lmer(Lftot_t2~Status*Sever+(1|COLONY), data = mayappleData_t2)
 a<-emmip(s_t2mod1, Sever~Status  ,CIs = TRUE,linearg = list(linetype = NA))+ ylab("Total leaf area (cm^2)")+ 
-  theme_bw()+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+xlab("")+theme(legend.position = "none")+theme(panel.border = element_blank(), axis.line = element_line())
-
-counts<-mayappleData_t2 %>% group_by(Status, Sever) %>% 
-  count(N=length(Sever))
+  theme_bw()+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+xlab("")+scale_y_continuous(limits=c(100, 1000))+theme(panel.border = element_blank(), axis.line = element_line())
 
 s_t2mod2<-lmer(Lf_t2s~Status*Sever+(1|COLONY), data = mayappleData_t2)
 b<-emmip(s_t2mod2, Sever~Status  ,CIs = TRUE,linearg = list(linetype = NA))+ ylab("Average leaf area per system (cm^2)")+ xlab("Number of descendant rhizome systems") + 
-  theme_bw()+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+scale_y_continuous(limits=c(-250, 1500))+ geom_text(data=counts, aes(x=Status, y=N, label=N, color=Sever))
+  theme_bw()+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+scale_y_continuous(limits=c(100, 1000))+theme(panel.border = element_blank(), axis.line = element_line())+theme(legend.position = "none")
 
-ggdraw(b) +
-  draw_plot(a, .35, .47, .6, .6, scale=0.75)
+grid.arrange(b, a, nrow=1)
+
+
 
 ```
 
