@@ -2,7 +2,7 @@
 
 This repository provides the data and code to accompany *Variation in the location and timing of experimental severing demonstrates that the persistent rhizome serves multiple functions in a clonal forest understory herb*.
 
-https://zenodo.org/badge/248031872.svg
+[![DOI](https://zenodo.org/badge/248031872.svg)](https://zenodo.org/badge/latestdoi/248031872)
 
 -----
 
